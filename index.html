@@ -828,9 +828,18 @@ async function doB(){
 
 async function toggleOrder(typ,idx){
   const id=currentSchiff;
-  state[id][typ][idx].bestellt=state[id][typ][idx].bestellt?0:1;
+  const neuerWert=state[id][typ][idx].bestellt?0:1;
+  state[id][typ][idx].bestellt=neuerWert;
   save();
-  await pushRow(id,typ,idx);
+  await sbUpsert('lagerbestand',{
+    standort:id,
+    typ:typ,
+    artikel_index:idx,
+    bestand:state[id][typ][idx].bestand,
+    soll:state[id][typ][idx].soll,
+    bestellt:neuerWert===1,
+    updated_at:now()
+  });
   renderSchiff();
 }
 
