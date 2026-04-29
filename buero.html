@@ -286,7 +286,10 @@ async function sbUpsert(table,data){
   try{const r=await fetch(`${SB_URL}/rest/v1/${table}`,{method:'POST',headers:{...SB_H,'Prefer':'resolution=merge-duplicates'},body:JSON.stringify(data)});return r.ok||r.status===201;}catch(e){return false;}
 }
 
-let syncing=false;
+let syncing=false, lastLocalChange={};
+function markChanged(st,typ,idx){lastLocalChange[`${st}_${typ}_${idx}`]=Date.now();}
+function recentlyChanged(st,typ,idx){return Date.now()-(lastLocalChange[`${st}_${typ}_${idx}`]||0)<90000;}
+
 async function syncAll(){
   if(syncing)return;
   syncing=true;
@@ -298,9 +301,7 @@ async function syncAll(){
   items.forEach(it=>{
     const st=it.standort,typ=it.typ,idx=it.artikel_index;
     if(state[st]&&state[st][typ]&&state[st][typ][idx]!==undefined){
-      const serverTime=new Date(it.updated_at||0).getTime();
-      const localTime=new Date(state[st][typ][idx].updated||0).getTime();
-      if(serverTime>=localTime){
+      if(!recentlyChanged(st,typ,idx)){
         state[st][typ][idx].bestand=parseFloat(it.bestand)||0;
         state[st][typ][idx].soll=parseFloat(it.soll)||0;
         state[st][typ][idx].bestellt=it.bestellt?1:0;
@@ -615,13 +616,16 @@ function renderLog(){
 async function setSoll(schiff,typ,idx,val){
   state[schiff][typ][idx].soll=parseFloat(val)||0;
   state[schiff][typ][idx].updated=now();
+  markChanged(schiff,typ,idx);
   save();updateBadge();
   await pushSoll(schiff,typ,idx);
 }
 async function confirmOrder(schiff,typ,idx){
   state[schiff][typ][idx].bestellt=0;
+  state[schiff][typ][idx].updated=now();
+  markChanged(schiff,typ,idx);
   save();
-  await pushSoll(schiff,typ,idx);
+  await sbUpsert('lagerbestand',{standort:schiff,typ:typ,artikel_index:idx,bestand:state[schiff][typ][idx].bestand,soll:state[schiff][typ][idx].soll,bestellt:false,updated_at:now()});
   renderPage();
 }
 
