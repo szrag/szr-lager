@@ -286,25 +286,33 @@ async function sbUpsert(table,data){
   try{const r=await fetch(`${SB_URL}/rest/v1/${table}`,{method:'POST',headers:{...SB_H,'Prefer':'resolution=merge-duplicates'},body:JSON.stringify(data)});return r.ok||r.status===201;}catch(e){return false;}
 }
 
+let syncing=false;
 async function syncAll(){
+  if(syncing)return;
+  syncing=true;
   const pill=document.getElementById('sync-pill');
   const txt=document.getElementById('sync-txt');
   pill.className='sync-pill ok';txt.textContent='Synchronisiere…';
   const items=await sbGet('lagerbestand');
-  if(!items){pill.className='sync-pill err';txt.textContent='Offline';return;}
+  if(!items){pill.className='sync-pill err';txt.textContent='Offline';syncing=false;return;}
   items.forEach(it=>{
     const st=it.standort,typ=it.typ,idx=it.artikel_index;
     if(state[st]&&state[st][typ]&&state[st][typ][idx]!==undefined){
-      state[st][typ][idx].bestand=parseFloat(it.bestand)||0;
-      state[st][typ][idx].soll=parseFloat(it.soll)||0;
-      state[st][typ][idx].bestellt=it.bestellt?1:0;
-      state[st][typ][idx].updated=it.updated_at||'';
+      const serverTime=new Date(it.updated_at||0).getTime();
+      const localTime=new Date(state[st][typ][idx].updated||0).getTime();
+      if(serverTime>=localTime){
+        state[st][typ][idx].bestand=parseFloat(it.bestand)||0;
+        state[st][typ][idx].soll=parseFloat(it.soll)||0;
+        state[st][typ][idx].bestellt=it.bestellt?1:0;
+        state[st][typ][idx].updated=it.updated_at||'';
+      }
     }
   });
   const li=await sbGet('transaktionen','order=zeitpunkt.desc');
   if(li)log=li.map(t=>({zeit:t.zeitpunkt,typ:t.typ,von:t.von,nach:t.nach,artikel:t.artikel,menge:t.menge,einheit:t.einheit})).slice(0,200);
   save();
   pill.className='sync-pill ok';txt.textContent='Verbunden · '+fmtT(now());
+  syncing=false;
   renderPage();
 }
 
@@ -606,21 +614,14 @@ function renderLog(){
 // ═══════════════════════════════════════
 async function setSoll(schiff,typ,idx,val){
   state[schiff][typ][idx].soll=parseFloat(val)||0;
+  state[schiff][typ][idx].updated=now();
   save();updateBadge();
   await pushSoll(schiff,typ,idx);
 }
 async function confirmOrder(schiff,typ,idx){
   state[schiff][typ][idx].bestellt=0;
   save();
-  await sbUpsert('lagerbestand',{
-    standort:schiff,
-    typ:typ,
-    artikel_index:idx,
-    bestand:state[schiff][typ][idx].bestand,
-    soll:state[schiff][typ][idx].soll,
-    bestellt:false,
-    updated_at:now()
-  });
+  await pushSoll(schiff,typ,idx);
   renderPage();
 }
 
