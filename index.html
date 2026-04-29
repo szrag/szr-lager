@@ -363,22 +363,32 @@ async function sbInsert(table,data){
   }catch(e){return false;}
 }
 
+let syncing=false, pendingSync=false;
 async function syncFromSB(){
+  if(syncing){pendingSync=true;return;}
+  syncing=true;
   updateSyncUI('syncing');
   const items=await sbGet('lagerbestand');
-  if(!items){updateSyncUI('offline');return;}
+  if(!items){updateSyncUI('offline');syncing=false;return;}
   items.forEach(it=>{
     const st=it.standort,typ=it.typ,idx=it.artikel_index;
     if(state[st]&&state[st][typ]&&state[st][typ][idx]!==undefined){
-      state[st][typ][idx].bestand=parseFloat(it.bestand)||0;
-      state[st][typ][idx].soll=parseFloat(it.soll)||0;
-      state[st][typ][idx].bestellt=it.bestellt?1:0;
-      state[st][typ][idx].updated=it.updated_at||'';
+      // Only update if server version is newer
+      const serverTime=new Date(it.updated_at||0).getTime();
+      const localTime=new Date(state[st][typ][idx].updated||0).getTime();
+      if(serverTime>=localTime){
+        state[st][typ][idx].bestand=parseFloat(it.bestand)||0;
+        state[st][typ][idx].soll=parseFloat(it.soll)||0;
+        state[st][typ][idx].bestellt=it.bestellt?1:0;
+        state[st][typ][idx].updated=it.updated_at||'';
+      }
     }
   });
   const logItems=await sbGet('transaktionen','order=zeitpunkt.desc');
   if(logItems)log=logItems.map(t=>({zeit:t.zeitpunkt,typ:t.typ,von:t.von,nach:t.nach,artikel:t.artikel,menge:t.menge,einheit:t.einheit})).slice(0,200);
   save();updateSyncUI('ok');
+  syncing=false;
+  if(pendingSync){pendingSync=false;syncFromSB();}
   if(currentSchiff)renderSchiff();
   renderLanding();
 }
@@ -785,7 +795,7 @@ function renderModal(){
 function adjust(id,typ,idx,delta){
   if(!state[id])return;
   state[id][typ][idx].bestand=Math.max(0,Math.round((state[id][typ][idx].bestand+delta)*2)/2);
-  state[id][typ][idx].updated=now();
+  state[id][typ][idx].updated=now(); // Mark as locally updated
 }
 
 async function doZ(){
@@ -828,18 +838,9 @@ async function doB(){
 
 async function toggleOrder(typ,idx){
   const id=currentSchiff;
-  const neuerWert=state[id][typ][idx].bestellt?0:1;
-  state[id][typ][idx].bestellt=neuerWert;
+  state[id][typ][idx].bestellt=state[id][typ][idx].bestellt?0:1;
   save();
-  await sbUpsert('lagerbestand',{
-    standort:id,
-    typ:typ,
-    artikel_index:idx,
-    bestand:state[id][typ][idx].bestand,
-    soll:state[id][typ][idx].soll,
-    bestellt:neuerWert===1,
-    updated_at:now()
-  });
+  await pushRow(id,typ,idx);
   renderSchiff();
 }
 
