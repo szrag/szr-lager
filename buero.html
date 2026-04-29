@@ -612,7 +612,15 @@ async function setSoll(schiff,typ,idx,val){
 async function confirmOrder(schiff,typ,idx){
   state[schiff][typ][idx].bestellt=0;
   save();
-  await pushSoll(schiff,typ,idx);
+  await sbUpsert('lagerbestand',{
+    standort:schiff,
+    typ:typ,
+    artikel_index:idx,
+    bestand:state[schiff][typ][idx].bestand,
+    soll:state[schiff][typ][idx].soll,
+    bestellt:false,
+    updated_at:now()
+  });
   renderPage();
 }
 
