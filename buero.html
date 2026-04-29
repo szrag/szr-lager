@@ -273,6 +273,47 @@ const WEIN=[
 ];
 
 // ═══════════════════════════════════════
+// SUPABASE
+// ═══════════════════════════════════════
+const SB_URL='https://ezgkryebktbamxyhemkv.supabase.co';
+const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV6Z2tyeWVia3RiYW14eWhlbWt2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc0ODY4ODksImV4cCI6MjA5MzA2Mjg4OX0.CZ0E_aCoCscgn4giXMgKoGhnKdgivrK9fgURbM0EKM0';
+const SB_H={'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY};
+
+async function sbGet(table,filter=''){
+  try{const r=await fetch(`${SB_URL}/rest/v1/${table}?${filter}&limit=1000`,{headers:{...SB_H,'Accept':'application/json'}});return r.ok?await r.json():null;}catch(e){return null;}
+}
+async function sbUpsert(table,data){
+  try{const r=await fetch(`${SB_URL}/rest/v1/${table}`,{method:'POST',headers:{...SB_H,'Prefer':'resolution=merge-duplicates'},body:JSON.stringify(data)});return r.ok||r.status===201;}catch(e){return false;}
+}
+
+async function syncAll(){
+  const pill=document.getElementById('sync-pill');
+  const txt=document.getElementById('sync-txt');
+  pill.className='sync-pill ok';txt.textContent='Synchronisiere…';
+  const items=await sbGet('lagerbestand');
+  if(!items){pill.className='sync-pill err';txt.textContent='Offline';return;}
+  items.forEach(it=>{
+    const st=it.standort,typ=it.typ,idx=it.artikel_index;
+    if(state[st]&&state[st][typ]&&state[st][typ][idx]!==undefined){
+      state[st][typ][idx].bestand=parseFloat(it.bestand)||0;
+      state[st][typ][idx].soll=parseFloat(it.soll)||0;
+      state[st][typ][idx].bestellt=it.bestellt?1:0;
+      state[st][typ][idx].updated=it.updated_at||'';
+    }
+  });
+  const li=await sbGet('transaktionen','order=zeitpunkt.desc');
+  if(li)log=li.map(t=>({zeit:t.zeitpunkt,typ:t.typ,von:t.von,nach:t.nach,artikel:t.artikel,menge:t.menge,einheit:t.einheit})).slice(0,200);
+  save();
+  pill.className='sync-pill ok';txt.textContent='Verbunden · '+fmtT(now());
+  renderPage();
+}
+
+async function pushSoll(schiff,typ,idx){
+  const r=state[schiff][typ][idx];
+  await sbUpsert('lagerbestand',{standort:schiff,typ,artikel_index:idx,bestand:r.bestand,soll:r.soll,bestellt:r.bestellt===1,updated_at:now()});
+}
+
+// ═══════════════════════════════════════
 // STATE
 // ═══════════════════════════════════════
 function initState(){
@@ -563,13 +604,16 @@ function renderLog(){
 // ═══════════════════════════════════════
 // ACTIONS
 // ═══════════════════════════════════════
-function setSoll(schiff,typ,idx,val){
+async function setSoll(schiff,typ,idx,val){
   state[schiff][typ][idx].soll=parseFloat(val)||0;
   save();updateBadge();
+  await pushSoll(schiff,typ,idx);
 }
-function confirmOrder(schiff,typ,idx){
+async function confirmOrder(schiff,typ,idx){
   state[schiff][typ][idx].bestellt=0;
-  save();renderPage();
+  save();
+  await pushSoll(schiff,typ,idx);
+  renderPage();
 }
 
 function printBestellliste(){
@@ -596,7 +640,8 @@ function printBestellliste(){
 // INIT
 // ═══════════════════════════════════════
 document.getElementById('header-date').textContent=new Date().toLocaleDateString('de-CH',{weekday:'long',day:'numeric',month:'long'});
-setInterval(()=>{state=JSON.parse(localStorage.getItem('szr_ship_v1')||'null')||state;log=JSON.parse(localStorage.getItem('szr_log_v1')||'[]');renderPage();},15000);
+syncAll();
+setInterval(syncAll,30000);
 renderPage();
 </script>
 </body>
