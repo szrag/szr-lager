@@ -363,7 +363,16 @@ async function sbInsert(table,data){
   }catch(e){return false;}
 }
 
-let syncing=false, pendingSync=false;
+let syncing=false, pendingSync=false, lastLocalChange={};
+
+function markChanged(st,typ,idx){
+  lastLocalChange[`${st}_${typ}_${idx}`]=Date.now();
+}
+function recentlyChanged(st,typ,idx){
+  const t=lastLocalChange[`${st}_${typ}_${idx}`]||0;
+  return Date.now()-t < 90000; // 90 Sekunden Schutz
+}
+
 async function syncFromSB(){
   if(syncing){pendingSync=true;return;}
   syncing=true;
@@ -373,10 +382,7 @@ async function syncFromSB(){
   items.forEach(it=>{
     const st=it.standort,typ=it.typ,idx=it.artikel_index;
     if(state[st]&&state[st][typ]&&state[st][typ][idx]!==undefined){
-      // Only update if server version is newer
-      const serverTime=new Date(it.updated_at||0).getTime();
-      const localTime=new Date(state[st][typ][idx].updated||0).getTime();
-      if(serverTime>=localTime){
+      if(!recentlyChanged(st,typ,idx)){
         state[st][typ][idx].bestand=parseFloat(it.bestand)||0;
         state[st][typ][idx].soll=parseFloat(it.soll)||0;
         state[st][typ][idx].bestellt=it.bestellt?1:0;
@@ -795,7 +801,8 @@ function renderModal(){
 function adjust(id,typ,idx,delta){
   if(!state[id])return;
   state[id][typ][idx].bestand=Math.max(0,Math.round((state[id][typ][idx].bestand+delta)*2)/2);
-  state[id][typ][idx].updated=now(); // Mark as locally updated
+  state[id][typ][idx].updated=now();
+  markChanged(id,typ,idx);
 }
 
 async function doZ(){
@@ -838,7 +845,9 @@ async function doB(){
 
 async function toggleOrder(typ,idx){
   const id=currentSchiff;
-  state[id][typ][idx].bestellt=state[id][typ][idx].bestellt?0:1;
+  const neuerWert=state[id][typ][idx].bestellt?0:1;
+  state[id][typ][idx].bestellt=neuerWert;
+  markChanged(id,typ,idx);
   save();
   await pushRow(id,typ,idx);
   renderSchiff();
