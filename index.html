@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>SZR · Schiff</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="SZR Schiff">
+<meta name="theme-color" content="#f2f2f7">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f2f2f7;
+  --bg2: #ffffff;
+  --bg3: #e5e5ea;
+  --blue: #007aff;
+  --blue-l: #e8f3ff;
+  --green: #34c759;
+  --green-l: #e8f8ed;
+  --orange: #ff9500;
+  --orange-l: #fff5e6;
+  --red: #ff3b30;
+  --red-l: #ffe8e7;
+  --text: #1c1c1e;
+  --text2: #3a3a3c;
+  --text3: #6c6c70;
+  --text4: #aeaeb2;
+  --border: rgba(0,0,0,0.08);
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow: 0 4px 16px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.05);
+  --shadow-lg: 0 12px 40px rgba(0,0,0,0.12), 0 4px 12px rgba(0,0,0,0.08);
+  --r: 16px;
+  --r-sm: 10px;
+  --r-xs: 8px;
+  --font: 'DM Sans', -apple-system, sans-serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html { height: 100%; }
+body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; -webkit-font-smoothing: antialiased; }
+
+/* ── PAGES ── */
+.page { display: none; min-height: 100vh; flex-direction: column; }
+.page.active { display: flex; }
+
+/* ── HEADER ── */
+.header {
+  background: rgba(242,242,247,0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  padding: 56px 20px 16px;
+  position: sticky; top: 0; z-index: 50;
+  border-bottom: 1px solid var(--border);
+}
+.header-inner { display: flex; align-items: center; gap: 12px; }
+.back-btn { width: 32px; height: 32px; border-radius: 50%; background: var(--bg2); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-sm); font-size: 18px; color: var(--blue); flex-shrink: 0; }
+.header-title { font-size: 20px; font-weight: 700; color: var(--text); flex: 1; }
+.header-sub { font-size: 13px; color: var(--text3); margin-top: 2px; }
+.header-badge { background: var(--blue); color: white; font-size: 12px; font-weight: 600; padding: 3px 8px; border-radius: 20px; }
+
+/* ── SCROLL CONTENT ── */
+.scroll { flex: 1; overflow-y: auto; padding: 16px 16px 100px; }
+.scroll::-webkit-scrollbar { display: none; }
+
+/* ── BOTTOM NAV ── */
+.bottom-nav {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: rgba(255,255,255,0.9);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid var(--border);
+  display: flex; padding: 8px 0 20px; z-index: 50;
+}
+.nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 4px 0; border: none; background: transparent; cursor: pointer; }
+.nav-item .ni-icon { font-size: 22px; line-height: 1; position: relative; }
+.nav-item .ni-label { font-size: 10px; font-weight: 500; color: var(--text4); }
+.nav-item.active .ni-label { color: var(--blue); }
+.nav-badge { position: absolute; top: -4px; right: -8px; background: var(--red); color: white; font-size: 10px; font-weight: 700; min-width: 16px; height: 16px; border-radius: 8px; display: flex; align-items: center; justify-content: center; padding: 0 4px; }
+
+/* ── CARDS ── */
+.card { background: var(--bg2); border-radius: var(--r); box-shadow: var(--shadow-sm); overflow: hidden; margin-bottom: 12px; }
+.card-header { padding: 14px 16px 10px; border-bottom: 1px solid var(--border); }
+.card-title { font-size: 13px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.05em; }
+
+/* ── LANDING PAGE ── */
+.landing-hero { padding: 40px 24px 24px; text-align: center; }
+.landing-logo { width: 72px; height: 72px; background: var(--blue); border-radius: 20px; margin: 0 auto 16px; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 24px rgba(0,122,255,0.3); }
+.landing-logo svg { width: 40px; height: 40px; fill: white; }
+.landing-title { font-family: 'DM Serif Display', serif; font-size: 32px; color: var(--text); margin-bottom: 6px; }
+.landing-sub { font-size: 15px; color: var(--text3); }
+.ship-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 0 16px 16px; }
+.ship-card {
+  background: var(--bg2); border-radius: var(--r); padding: 20px 16px;
+  box-shadow: var(--shadow); cursor: pointer; border: 2px solid transparent;
+  transition: all 0.2s; text-align: center; position: relative; overflow: hidden;
+}
+.ship-card:active { transform: scale(0.97); }
+.ship-card.klein { background: linear-gradient(135deg, #f0fdf4, #dcfce7); border-color: rgba(52,199,89,0.2); }
+.ship-card .ship-icon { font-size: 36px; margin-bottom: 8px; }
+.ship-card .ship-name { font-size: 15px; font-weight: 700; color: var(--text); }
+.ship-card .ship-type { font-size: 12px; color: var(--text3); margin-top: 2px; }
+.ship-card .ship-status { position: absolute; top: 10px; right: 10px; width: 10px; height: 10px; border-radius: 50%; }
+.ship-card .s-ok { background: var(--green); }
+.ship-card .s-warn { background: var(--orange); }
+.ship-card .s-bad { background: var(--red); }
+
+/* ── OVERVIEW ITEMS ── */
+.overview-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 16px; border-bottom: 1px solid var(--border);
+}
+.overview-item:last-child { border-bottom: none; }
+.oi-indicator { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.oi-name { flex: 1; font-size: 15px; font-weight: 500; }
+.oi-sub { font-size: 12px; color: var(--text3); margin-top: 1px; }
+.oi-right { text-align: right; }
+.oi-val { font-size: 16px; font-weight: 700; }
+.oi-soll { font-size: 12px; color: var(--text3); }
+.oi-actions { display: flex; gap: 6px; }
+.oi-btn { width: 32px; height: 32px; border-radius: 50%; border: none; cursor: pointer; font-size: 18px; font-weight: 300; display: flex; align-items: center; justify-content: center; }
+.oi-btn-minus { background: var(--red-l); color: var(--red); }
+.oi-btn-plus { background: var(--blue-l); color: var(--blue); }
+
+/* ── ALARM ITEM ── */
+.alarm-item { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-bottom: 1px solid var(--border); }
+.alarm-item:last-child { border-bottom: none; }
+.alarm-icon { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+.alarm-icon.red { background: var(--red-l); }
+.alarm-icon.orange { background: var(--orange-l); }
+.alarm-info { flex: 1; }
+.alarm-name { font-size: 15px; font-weight: 600; }
+.alarm-detail { font-size: 13px; color: var(--text3); margin-top: 2px; }
+.alarm-btn { padding: 7px 14px; border-radius: 20px; border: none; cursor: pointer; font-size: 13px; font-weight: 600; background: var(--blue); color: white; white-space: nowrap; }
+
+/* ── LOG ── */
+.log-item { display: flex; gap: 12px; padding: 12px 16px; border-bottom: 1px solid var(--border); }
+.log-item:last-child { border-bottom: none; }
+.log-dot-wrap { display: flex; flex-direction: column; align-items: center; padding-top: 4px; }
+.log-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.log-line { width: 1px; flex: 1; background: var(--border); margin-top: 4px; }
+.log-content { flex: 1; }
+.log-title { font-size: 14px; font-weight: 600; }
+.log-sub { font-size: 12px; color: var(--text3); margin-top: 2px; }
+.log-time { font-size: 11px; color: var(--text4); margin-top: 4px; }
+
+/* ── MODAL ── */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 200; display: flex; align-items: flex-end; justify-content: center; animation: fadeIn 0.2s; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.modal-sheet { background: var(--bg2); border-radius: 20px 20px 0 0; width: 100%; max-width: 560px; max-height: 92vh; overflow-y: auto; padding: 8px 0 40px; animation: slideUp 0.3s cubic-bezier(0.34,1.56,0.64,1); }
+@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+.modal-handle { width: 36px; height: 4px; background: var(--bg3); border-radius: 2px; margin: 8px auto 20px; }
+.modal-title { font-size: 20px; font-weight: 700; padding: 0 20px 4px; }
+.modal-sub { font-size: 14px; color: var(--text3); padding: 0 20px 20px; }
+.modal-section { padding: 0 20px 16px; }
+.modal-label { font-size: 12px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+.modal-select { width: 100%; padding: 13px 14px; border: 1.5px solid var(--border); border-radius: var(--r-sm); font-size: 15px; font-family: var(--font); background: var(--bg); color: var(--text); appearance: none; }
+.modal-select:focus { outline: none; border-color: var(--blue); }
+
+/* ── HERKUNFT GRID ── */
+.hk-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.hk-btn { padding: 14px 12px; border: 2px solid var(--border); border-radius: var(--r-sm); background: var(--bg); cursor: pointer; text-align: center; transition: all 0.15s; }
+.hk-btn.sel { border-color: var(--blue); background: var(--blue-l); }
+.hk-btn .hk-icon { font-size: 24px; margin-bottom: 6px; }
+.hk-btn .hk-label { font-size: 13px; font-weight: 600; color: var(--text2); }
+
+/* ── MENGE PICKER ── */
+.menge-picker { display: flex; align-items: center; justify-content: center; gap: 20px; padding: 8px 0; }
+.mp-btn { width: 48px; height: 48px; border-radius: 50%; border: none; cursor: pointer; font-size: 26px; font-weight: 300; display: flex; align-items: center; justify-content: center; transition: transform 0.1s; }
+.mp-btn:active { transform: scale(0.9); }
+.mp-minus { background: var(--red-l); color: var(--red); }
+.mp-plus { background: var(--blue-l); color: var(--blue); }
+.mp-val { text-align: center; min-width: 80px; }
+.mp-num { font-size: 36px; font-weight: 700; }
+.mp-unit { font-size: 13px; color: var(--text3); margin-top: 2px; }
+
+/* ── ACTION BTN ── */
+.action-btn { width: calc(100% - 40px); margin: 8px 20px 0; padding: 16px; border-radius: var(--r-sm); border: none; cursor: pointer; font-size: 17px; font-weight: 600; font-family: var(--font); transition: all 0.15s; }
+.action-btn:active { transform: scale(0.98); }
+.action-btn-blue { background: var(--blue); color: white; box-shadow: 0 4px 12px rgba(0,122,255,0.3); }
+.action-btn-red { background: var(--red); color: white; box-shadow: 0 4px 12px rgba(255,59,48,0.3); }
+.action-btn-green { background: var(--green); color: white; box-shadow: 0 4px 12px rgba(52,199,89,0.3); }
+
+/* ── SEGMENT CONTROL ── */
+.segment { display: flex; background: var(--bg3); border-radius: 10px; padding: 2px; margin: 0 16px 16px; }
+.seg-btn { flex: 1; padding: 7px 4px; border: none; background: transparent; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; color: var(--text3); transition: all 0.15s; }
+.seg-btn.active { background: white; color: var(--text); font-weight: 600; box-shadow: var(--shadow-sm); }
+
+/* ── EMPTY STATE ── */
+.empty { padding: 48px 24px; text-align: center; }
+.empty-icon { font-size: 48px; margin-bottom: 12px; }
+.empty-title { font-size: 17px; font-weight: 600; color: var(--text2); margin-bottom: 6px; }
+.empty-sub { font-size: 14px; color: var(--text3); }
+
+/* ── SYNC BAR ── */
+.sync-bar { display: flex; align-items: center; gap: 8px; padding: 8px 16px; font-size: 12px; }
+.sync-bar.ok { background: var(--green-l); color: var(--green); }
+.sync-bar.err { background: var(--red-l); color: var(--red); }
+.sync-bar.off { background: var(--bg3); color: var(--text3); }
+.sync-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+/* ── KLEIN BANNER ── */
+.klein-banner { background: linear-gradient(135deg, #e8f8ed, #f0fdf4); border: 1px solid rgba(52,199,89,0.2); border-radius: var(--r); padding: 16px; margin-bottom: 16px; }
+.kb-title { font-size: 15px; font-weight: 700; color: #1a7a3a; margin-bottom: 4px; }
+.kb-sub { font-size: 13px; color: #2d8a4e; }
+
+/* ── FAB ── */
+.fab-area { position: fixed; bottom: 90px; right: 20px; display: flex; flex-direction: column; gap: 10px; z-index: 40; }
+.fab { width: 52px; height: 52px; border-radius: 50%; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 24px; box-shadow: var(--shadow-lg); transition: transform 0.15s; }
+.fab:active { transform: scale(0.93); }
+.fab-blue { background: var(--blue); color: white; }
+.fab-red { background: var(--red); color: white; }
+.fab-green { background: var(--green); color: white; }
+
+/* ── TAGS ── */
+.tag { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+.tag-ok { background: var(--green-l); color: var(--green); }
+.tag-warn { background: var(--orange-l); color: var(--orange); }
+.tag-bad { background: var(--red-l); color: var(--red); }
+.tag-none { background: var(--bg3); color: var(--text3); }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════ -->
+<!-- LANDING: SCHIFF WÄHLEN -->
+<!-- ══════════════════════════════════════ -->
+<div class="page active" id="pg-landing">
+  <div style="padding:56px 0 0;background:var(--bg);min-height:100vh">
+    <div class="landing-hero">
+      <div class="landing-logo">
+        <svg viewBox="0 0 24 24"><path d="M20 21c-1.39 0-2.78-.47-4-1.32-2.44 1.71-5.56 1.71-8 0C6.78 20.53 5.39 21 4 21H2v2h2c1.25 0 2.45-.2 3.57-.57a9.95 9.95 0 0 0 8.86 0C17.55 22.8 18.75 23 20 23h2v-2h-2zM3.95 19H4c1.6 0 3.02-.88 4-2 .98 1.12 2.4 2 4 2s3.02-.88 4-2c.98 1.12 2.4 2 4 2h.05l1.89-6.68c.08-.26.06-.54-.06-.78s-.34-.42-.59-.5L20 10.62V6c0-1.1-.9-2-2-2h-3V1H9v3H6c-1.1 0-2 .9-2 2v4.62l-1.29.42c-.25.08-.47.26-.59.5s-.15.52-.06.78L3.95 19zM6 6h12v3.97L12 8 6 9.97V6z"/></svg>
+      </div>
+      <div class="landing-title">SZR Lager</div>
+      <div class="landing-sub">Schiff wählen</div>
+    </div>
+    <div id="ship-grid" class="ship-grid"></div>
+    <div id="sync-landing" class="sync-bar off" style="margin:8px 16px;border-radius:10px">
+      <div class="sync-dot"></div><span>Verbinde mit SharePoint…</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ -->
+<!-- SCHIFF APP -->
+<!-- ══════════════════════════════════════ -->
+<div class="page" id="pg-schiff">
+  <div class="header">
+    <div class="header-inner">
+      <button class="back-btn" onclick="goBack()">‹</button>
+      <div>
+        <div class="header-title" id="schiff-title">MS Rhystern</div>
+        <div class="header-sub" id="schiff-sub">Softgetränke · Wein</div>
+      </div>
+      <div class="header-badge" id="alarm-badge" style="display:none">0</div>
+    </div>
+  </div>
+  <div id="sync-schiff" class="sync-bar off"><div class="sync-dot"></div><span>Offline</span></div>
+  <div class="segment" style="margin-top:12px">
+    <button class="seg-btn active" onclick="setSchiffTab('übersicht',this)">Übersicht</button>
+    <button class="seg-btn" onclick="setSchiffTab('alarm',this)">⚠ Alarm</button>
+    <button class="seg-btn" onclick="setSchiffTab('aktivität',this)">Aktivität</button>
+  </div>
+  <div class="scroll" id="schiff-content"></div>
+  <div class="fab-area" id="schiff-fabs"></div>
+  <div class="bottom-nav" style="display:none"></div>
+</div>
+
+<!-- ══════════════════════════════════════ -->
+<!-- MODAL -->
+<!-- ══════════════════════════════════════ -->
+<div id="modal-root"></div>
+
+<script>
+// ═══════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════
+const SCHIFFE_L = [
+  {id:'Bootshaus',   name:'Bootshaus',   icon:'🏠', type:'Hauptlager'},
+  {id:'MS Rhystern', name:'MS Rhystern', icon:'🚢', type:'Grosses Schiff'},
+  {id:'MS Rhenus',   name:'MS Rhenus',   icon:'🚢', type:'Grosses Schiff'},
+  {id:'MS Hecht',    name:'MS Hecht',    icon:'🚤', type:'Schiff'},
+];
+const SCHIFFE_K = [
+  {id:'MW Neptun',   name:'MW Neptun',   icon:'⛵', type:'Kleines Schiff'},
+  {id:'MW Nautilus', name:'MW Nautilus', icon:'⛵', type:'Kleines Schiff'},
+  {id:'MS Flipper',  name:'MS Flipper',  icon:'🛥', type:'Kleines Schiff'},
+];
+const ALLE_SCHIFFE = [...SCHIFFE_L, ...SCHIFFE_K];
+
+const SOFT = [
+  {nr:'10301',name:'Rivella Rot',geb:'24x33cl',chf:25.91},
+  {nr:'10406',name:'Eptinger rot m. Kohlens.',geb:'12x1l',chf:12.75},
+  {nr:'10641',name:'Schweppes Indian Tonic',geb:'30x20cl',chf:28.30},
+  {nr:'10742',name:'Eptinger blau o. Kohlens.',geb:'12x1l',chf:12.75},
+  {nr:'14381',name:'Red Bull Original',geb:'24x25cl',chf:28.67},
+  {nr:'15273',name:'Eptinger blau 33cl',geb:'24x33cl',chf:21.62},
+  {nr:'39390',name:'Möhl Saft alkoholfrei',geb:'15x50cl',chf:22.69},
+  {nr:'52833',name:'Calanda Radler',geb:'24x33cl',chf:28.46},
+  {nr:'10309',name:'Elmer Citro',geb:'24x33cl',chf:21.06},
+  {nr:'39167',name:'Schweppes Ginger Ale',geb:'4x6x50cl',chf:30.95},
+  {nr:'42837',name:'Appenzeller Leermond',geb:'24x33cl',chf:44.40},
+  {nr:'56077',name:'Vivi Kola Zéro',geb:'24x33cl',chf:37.44},
+  {nr:'56078',name:'Vivi Kola Original',geb:'24x33cl',chf:37.44},
+  {nr:'67355',name:'Vivi Soda Apfelschorle',geb:'24x33cl',chf:37.74},
+  {nr:'67356',name:'Vivi Soda Zitrone Ingwer',geb:'24x33cl',chf:37.74},
+  {nr:'10306',name:'Eptinger rot 33cl',geb:'24x33cl',chf:21.62},
+  {nr:'62276',name:'Vivitz Bio Eistee',geb:'4x6x50cl',chf:48.20},
+  {nr:'68737',name:'Vivi BIO Mate Cascara',geb:'24x33cl',chf:37.74},
+  {nr:'10707',name:'Ramseier Orangensaft',geb:'12x1l',chf:28.04},
+];
+const WEIN = [
+  {kat:'Schaumwein',name:'Secco alkoholfrei',vol:'7.5dl'},
+  {kat:'Schaumwein',name:'Prosecco Contessa Giulia',vol:'7.0dl'},
+  {kat:'Weisswein',name:'Teufener Surprise',vol:'5.0dl'},
+  {kat:'Weisswein',name:'Teufener Riesling x Sylvaner',vol:'7.5dl'},
+  {kat:'Weisswein',name:'Teufener Federweiss',vol:'7.5dl'},
+  {kat:'Weisswein',name:'Teufener Pinot Gris',vol:'7.5dl'},
+  {kat:'Weisswein',name:'Freiensteiner Riesling x Sylvaner',vol:'7.5dl'},
+  {kat:'Weisswein',name:'Eglisauer Riesling x Sylvaner',vol:'7.0dl'},
+  {kat:'Weisswein',name:'Eglisauer Räuschling',vol:'7.5dl'},
+  {kat:'Weisswein',name:'Rüdlinger Federweiss',vol:'5.0dl'},
+  {kat:'Weisswein',name:'Buchberger Riesling x Sylvaner',vol:'7.5dl'},
+  {kat:'Weisswein',name:'Chardonnay California',vol:'7.5dl'},
+  {kat:'Rosé',name:'Buchberger Rosé',vol:'5.0dl'},
+  {kat:'Rotwein',name:'Teufener Blauburgunder',vol:'7.5dl'},
+  {kat:'Rotwein',name:'Freiensteiner Pinot Schwarz',vol:'7.5dl'},
+  {kat:'Rotwein',name:'Eglisauer Pinot Noir Auslese',vol:'7.5dl'},
+  {kat:'Rotwein',name:'Eglisauer Pinot Noir Selection',vol:'7.5dl'},
+  {kat:'Rotwein',name:'Rüdlinger Pinot Noir',vol:'5.0dl'},
+  {kat:'Rotwein',name:'Buchberger Blauburgunder 5dl',vol:'5.0dl'},
+  {kat:'Rotwein',name:'Buchberger Blauburgunder 7dl',vol:'7.0dl'},
+  {kat:'Rotwein',name:'Cabernet Sauvignon California',vol:'7.5dl'},
+  {kat:'Rotwein',name:'Salento IGT Primitivo',vol:'7.5dl'},
+];
+
+// ═══════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════
+function initState(){
+  const s={};
+  SCHIFFE_L.forEach(({id})=>{
+    s[id]={
+      soft:SOFT.map(()=>({bestand:0,soll:0,bestellt:0,updated:''})),
+      wein:WEIN.map(()=>({bestand:0,soll:0,bestellt:0,updated:''})),
+    };
+  });
+  return s;
+}
+let state, log=[];
+try{state=JSON.parse(localStorage.getItem('szr_ship_v1')||'null')||initState();}catch(e){state=initState();}
+try{log=JSON.parse(localStorage.getItem('szr_log_v1')||'[]');}catch(e){}
+
+function save(){
+  try{localStorage.setItem('szr_ship_v1',JSON.stringify(state));localStorage.setItem('szr_log_v1',JSON.stringify(log.slice(0,300)));}catch(e){}
+}
+
+// UI State
+let currentSchiff=null, schiffTab='übersicht', produktTab='soft', modal=null;
+
+// Modal forms
+let zF={typ:'soft',art:0,menge:0.5,herkunft:'lieferung',vonSchiff:'Bootshaus'};
+let aF={typ:'soft',art:0,menge:0.5};
+let bF={schiff:'MW Neptun',typ:'soft',art:0,menge:0.5};
+
+// ═══════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════
+function fmtH(v,typ){const u=typ==='wein'?'Einh.':'Hr.';if(v===0)return'0 '+u;if(v%1===0)return v+' '+u;return'½ '+u;}
+function fmtT(iso){if(!iso)return'–';try{const d=new Date(iso);return d.toLocaleDateString('de-CH',{day:'2-digit',month:'2-digit'})+' '+d.toLocaleTimeString('de-CH',{hour:'2-digit',minute:'2-digit'});}catch(e){return '';}}
+function now(){return new Date().toISOString();}
+
+function getStatus(bestand,soll){
+  if(bestand<=0)return'bad';
+  if(soll>0&&bestand<soll)return'warn';
+  return'ok';
+}
+function statusColor(s){return s==='bad'?'var(--red)':s==='warn'?'var(--orange)':'var(--green)';}
+function statusTag(s){return s==='bad'?'<span class="tag tag-bad">Leer</span>':s==='warn'?'<span class="tag tag-warn">Tief</span>':'<span class="tag tag-ok">OK</span>';}
+
+function isKlein(id){return SCHIFFE_K.some(s=>s.id===id);}
+
+function schiffStatus(id){
+  if(isKlein(id))return'ok';
+  if(!state[id])return'ok';
+  let worst='ok';
+  ['soft','wein'].forEach(typ=>{
+    state[id][typ].forEach(r=>{
+      const s=getStatus(r.bestand,r.soll);
+      if(s==='bad')worst='bad';
+      else if(s==='warn'&&worst!=='bad')worst='warn';
+    });
+  });
+  return worst;
+}
+
+function countAlarms(id){
+  if(isKlein(id)||!state[id])return 0;
+  let n=0;
+  ['soft','wein'].forEach(typ=>{state[id][typ].forEach(r=>{if(getStatus(r.bestand,r.soll)!=='ok')n++;});});
+  return n;
+}
+
+function addLog(e){log.unshift({...e,zeit:now()});save();}
+
+// ═══════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════
+function showPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function selectSchiff(id){
+  currentSchiff=id;
+  const info=ALLE_SCHIFFE.find(s=>s.id===id);
+  document.getElementById('schiff-title').textContent=info.icon+' '+info.name;
+  document.getElementById('schiff-sub').textContent=isKlein(id)?'Bezug aus Bootshaus':'Softgetränke · Wein (6er-Einheiten)';
+  schiffTab='übersicht';
+  produktTab='soft';
+  showPage('pg-schiff');
+  renderSchiff();
+}
+
+function goBack(){showPage('pg-landing');renderLanding();}
+
+function setSchiffTab(tab,btn){
+  schiffTab=tab;
+  document.querySelectorAll('.seg-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderSchiff();
+}
+
+// ═══════════════════════════════════════
+// RENDER LANDING
+// ═══════════════════════════════════════
+function renderLanding(){
+  const grid=document.getElementById('ship-grid');
+  const all=[...SCHIFFE_L,...SCHIFFE_K];
+  grid.innerHTML=all.map(s=>{
+    const st=schiffStatus(s.id);
+    const col=statusColor(st);
+    const alarms=countAlarms(s.id);
+    return`<div class="ship-card ${SCHIFFE_K.some(k=>k.id===s.id)?'klein':''}" onclick="selectSchiff('${s.id}')">
+      <div class="ship-status ${st==='bad'?'s-bad':st==='warn'?'s-warn':'s-ok'}"></div>
+      <div class="ship-icon">${s.icon}</div>
+      <div class="ship-name">${s.name}</div>
+      <div class="ship-type">${s.type}</div>
+      ${alarms>0?`<div style="margin-top:8px"><span class="tag ${st==='bad'?'tag-bad':'tag-warn'}">${alarms} Alarm${alarms>1?'e':''}</span></div>`:''}
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════
+// RENDER SCHIFF
+// ═══════════════════════════════════════
+function renderSchiff(){
+  const id=currentSchiff;
+  const klein=isKlein(id);
+  const alarms=countAlarms(id);
+  const badge=document.getElementById('alarm-badge');
+  if(alarms>0){badge.style.display='';badge.textContent=alarms;}
+  else badge.style.display='none';
+
+  const fabs=document.getElementById('schiff-fabs');
+  if(klein){
+    fabs.innerHTML=`<button class="fab fab-green" onclick="openBezug()" title="Bezug aus Bootshaus">⇄</button>`;
+  } else {
+    fabs.innerHTML=`
+      <button class="fab fab-red" onclick="openAbgang()" title="Verbrauch">−</button>
+      <button class="fab fab-blue" onclick="openZubuchung()" title="Auffüllen">+</button>`;
+  }
+
+  const content=document.getElementById('schiff-content');
+  if(klein){content.innerHTML=renderKlein(id);return;}
+
+  if(schiffTab==='übersicht') content.innerHTML=renderÜbersicht(id);
+  else if(schiffTab==='alarm') content.innerHTML=renderAlarm(id);
+  else content.innerHTML=renderAktivität(id);
+}
+
+function renderÜbersicht(id){
+  const d=state[id];
+  // Segment für Soft/Wein
+  const seg=`<div class="segment" style="margin:0 0 12px">
+    <button class="seg-btn ${produktTab==='soft'?'active':''}" onclick="produktTab='soft';renderSchiff()">Softgetränke</button>
+    <button class="seg-btn ${produktTab==='wein'?'active':''}" onclick="produktTab='wein';renderSchiff()">Wein (6er)</button>
+  </div>`;
+
+  const items=produktTab==='soft'?SOFT:WEIN;
+  let lastKat='';
+  let rows='';
+  items.forEach((p,i)=>{
+    const r=d[produktTab][i];
+    const st=getStatus(r.bestand,r.soll);
+    const diff=r.soll>0?r.bestand-r.soll:null;
+    const diffHtml=diff!==null?`<span style="font-size:11px;font-weight:600;color:${diff>=0?'var(--green)':'var(--red)'};margin-left:4px">${diff>=0?'+':''}${diff}</span>`:'';
+
+    if(produktTab==='wein'&&p.kat!==lastKat){
+      rows+=`<div style="padding:8px 16px 4px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3)">${p.kat}</div>`;
+      lastKat=p.kat;
+    }
+
+    rows+=`<div class="overview-item">
+      <div class="oi-indicator" style="background:${statusColor(st)}"></div>
+      <div style="flex:1">
+        <div class="oi-name">${p.name}</div>
+        <div class="oi-sub">${produktTab==='soft'?p.geb:'6er-Einheit · '+p.vol}</div>
+      </div>
+      <div class="oi-right" style="margin-right:10px">
+        <div class="oi-val">${fmtH(r.bestand,produktTab)}${diffHtml}</div>
+        <div class="oi-soll">Soll: ${fmtH(r.soll,produktTab)}</div>
+      </div>
+      <div class="oi-actions">
+        <button class="oi-btn oi-btn-minus" onclick="quickA('${produktTab}',${i})">−</button>
+        <button class="oi-btn oi-btn-plus" onclick="quickZ('${produktTab}',${i})">+</button>
+      </div>
+    </div>`;
+  });
+
+  return seg+`<div class="card">${rows}</div>`;
+}
+
+function renderAlarm(id){
+  const d=state[id];
+  const alarms=[];
+  ['soft','wein'].forEach(typ=>{
+    (typ==='soft'?SOFT:WEIN).forEach((p,i)=>{
+      const r=d[typ][i];
+      const st=getStatus(r.bestand,r.soll);
+      if(st!=='ok')alarms.push({...p,typ,idx:i,r,st});
+    });
+  });
+
+  if(!alarms.length)return`<div class="empty"><div class="empty-icon">✅</div><div class="empty-title">Alles OK!</div><div class="empty-sub">Keine Alarme aktiv.</div></div>`;
+
+  const bad=alarms.filter(a=>a.st==='bad');
+  const warn=alarms.filter(a=>a.st==='warn');
+
+  let html='';
+  if(bad.length){
+    html+=`<div style="padding:8px 16px 6px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--red)">🔴 Leer (${bad.length})</div>`;
+    html+=`<div class="card">${bad.map(a=>`
+      <div class="alarm-item">
+        <div class="alarm-icon red">📦</div>
+        <div class="alarm-info">
+          <div class="alarm-name">${a.name}</div>
+          <div class="alarm-detail">${a.typ==='soft'?a.geb:'6er-Einheit'} · Ist: ${fmtH(a.r.bestand,a.typ)} · Soll: ${fmtH(a.r.soll,a.typ)}</div>
+        </div>
+        <button class="alarm-btn" onclick="toggleOrder('${a.typ}',${a.idx})">${a.r.bestellt?'✓ Gemeldet':'Bestellen'}</button>
+      </div>`).join('')}</div>`;
+  }
+  if(warn.length){
+    html+=`<div style="padding:8px 16px 6px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--orange)">🟠 Tief (${warn.length})</div>`;
+    html+=`<div class="card">${warn.map(a=>`
+      <div class="alarm-item">
+        <div class="alarm-icon orange">⚠️</div>
+        <div class="alarm-info">
+          <div class="alarm-name">${a.name}</div>
+          <div class="alarm-detail">${a.typ==='soft'?a.geb:'6er-Einheit'} · Ist: ${fmtH(a.r.bestand,a.typ)} · Soll: ${fmtH(a.r.soll,a.typ)}</div>
+        </div>
+        <button class="alarm-btn" onclick="toggleOrder('${a.typ}',${a.idx})">${a.r.bestellt?'✓ Gemeldet':'Bestellen'}</button>
+      </div>`).join('')}</div>`;
+  }
+
+  // Drucken
+  html+=`<button onclick="printAlarm('${id}')" style="width:100%;padding:14px;border-radius:var(--r-sm);border:1.5px solid var(--border);background:white;font-size:15px;font-weight:600;cursor:pointer;margin-top:4px">🖨 Bestellliste drucken</button>`;
+  return html;
+}
+
+function renderAktivität(id){
+  const items=log.filter(e=>e.von===id||e.nach===id).slice(0,40);
+  if(!items.length)return`<div class="empty"><div class="empty-icon">📋</div><div class="empty-title">Noch nichts</div><div class="empty-sub">Hier erscheinen alle Aktionen.</div></div>`;
+  return`<div class="card">${items.map((e,i)=>{
+    const col=e.typ==='Zubuchung'?'var(--blue)':e.typ==='Verbrauch'?'var(--red)':'var(--green)';
+    const icon=e.typ==='Zubuchung'?'↑':e.typ==='Verbrauch'?'↓':'⇄';
+    return`<div class="log-item">
+      <div class="log-dot-wrap">
+        <div class="log-dot" style="background:${col}"></div>
+        ${i<items.length-1?'<div class="log-line"></div>':''}
+      </div>
+      <div class="log-content">
+        <div class="log-title">${icon} ${e.typ} · ${e.menge} ${e.einheit||''}</div>
+        <div class="log-sub">${e.artikel}</div>
+        <div class="log-sub">${e.von||'–'} → ${e.nach||'–'}</div>
+        <div class="log-time">${fmtT(e.zeit)}</div>
+      </div>
+    </div>`;
+  }).join('')}</div>`;
+}
+
+function renderKlein(id){
+  const info=ALLE_SCHIFFE.find(s=>s.id===id);
+  const items=log.filter(e=>e.von===id||e.nach===id).slice(0,20);
+  return`<div class="klein-banner">
+    <div class="kb-title">${info.icon} ${info.name}</div>
+    <div class="kb-sub">Kein eigenes Lager. Bezüge aus dem Bootshaus hier erfassen — der Bootshaus-Bestand wird automatisch angepasst.</div>
+  </div>
+  <div class="card" style="margin-bottom:12px">
+    <div class="card-header"><div class="card-title">Letzte Bezüge</div></div>
+    ${!items.length?'<div class="empty" style="padding:24px"><div class="empty-icon">📭</div><div class="empty-sub">Noch keine Bezüge erfasst.</div></div>':
+    items.map(e=>`<div class="log-item">
+      <div class="log-dot-wrap"><div class="log-dot" style="background:var(--green)"></div></div>
+      <div class="log-content">
+        <div class="log-title">⇄ ${e.artikel} · ${e.menge} ${e.einheit||''}</div>
+        <div class="log-sub">Bootshaus → ${e.nach||id}</div>
+        <div class="log-time">${fmtT(e.zeit)}</div>
+      </div>
+    </div>`).join('')}
+  </div>`;
+}
+
+// ═══════════════════════════════════════
+// MODALS
+// ═══════════════════════════════════════
+function artOptions(form){
+  const items=form.typ==='soft'?SOFT:WEIN;
+  return items.map((p,i)=>`<option value="${i}" ${form.art===i?'selected':''}>${p.name}</option>`).join('');
+}
+
+function mengePicker(val,fvar,min=0.5){
+  const label=val%1!==0?'½ Harasse / ½ Einheit':val+' '+(val===1?'Harasse / Einheit':'Harassen / Einheiten');
+  return`<div class="menge-picker">
+    <button class="mp-btn mp-minus" onclick="${fvar}.menge=Math.max(${min},Math.round((${fvar}.menge-0.5)*2)/2);renderModal()">−</button>
+    <div class="mp-val"><div class="mp-num">${val}</div><div class="mp-unit">${label}</div></div>
+    <button class="mp-btn mp-plus" onclick="${fvar}.menge=Math.round((${fvar}.menge+0.5)*2)/2;renderModal()">+</button>
+  </div>`;
+}
+
+function renderModal(){
+  const root=document.getElementById('modal-root');
+  if(!modal){root.innerHTML='';return;}
+
+  if(modal==='zubuchung'){
+    const st=currentSchiff;
+    const schiffOpts=SCHIFFE_L.filter(s=>s.id!==st).map(s=>`<option value="${s.id}" ${zF.vonSchiff===s.id?'selected':''}>${s.name}</option>`).join('');
+    root.innerHTML=`<div class="modal-overlay" onclick="closeModal()"><div class="modal-sheet" onclick="event.stopPropagation()">
+      <div class="modal-handle"></div>
+      <div class="modal-title">Zubuchung / Auffüllen</div>
+      <div class="modal-sub">Woher kommen die Getränke?</div>
+      <div class="modal-section">
+        <div class="modal-label">Typ</div>
+        <select class="modal-select" onchange="zF.typ=this.value;zF.art=0;renderModal()">
+          <option value="soft" ${zF.typ==='soft'?'selected':''}>Softgetränke (Harassen)</option>
+          <option value="wein" ${zF.typ==='wein'?'selected':''}>Wein (6er-Einheiten)</option>
+        </select>
+      </div>
+      <div class="modal-section">
+        <div class="modal-label">Artikel</div>
+        <select class="modal-select" onchange="zF.art=parseInt(this.value)">${artOptions(zF)}</select>
+      </div>
+      <div class="modal-section">
+        <div class="modal-label">Herkunft</div>
+        <div class="hk-grid">
+          ${[['lieferung','🚚','Lieferung\n(extern)'],['bootshaus','🏠','Bootshaus'],['schiff','🚢','Anderes\nSchiff']].map(([v,ic,lb])=>
+            `<button class="hk-btn ${zF.herkunft===v?'sel':''}" onclick="zF.herkunft='${v}';renderModal()">
+              <div class="hk-icon">${ic}</div><div class="hk-label">${lb}</div></button>`).join('')}
+        </div>
+        ${zF.herkunft==='schiff'?`<div style="margin-top:10px"><div class="modal-label">Von welchem Schiff?</div>
+          <select class="modal-select" onchange="zF.vonSchiff=this.value">${schiffOpts}</select></div>`:''}
+      </div>
+      <div class="modal-section"><div class="modal-label">Menge</div>${mengePicker(zF.menge,'zF')}</div>
+      <button class="action-btn action-btn-blue" onclick="commitZ()">Zubuchung bestätigen ✓</button>
+    </div></div>`;
+  }
+
+  else if(modal==='abgang'){
+    root.innerHTML=`<div class="modal-overlay" onclick="closeModal()"><div class="modal-sheet" onclick="event.stopPropagation()">
+      <div class="modal-handle"></div>
+      <div class="modal-title">Verbrauch / Abgang</div>
+      <div class="modal-sub">Wieviel wurde verbraucht oder abgegeben?</div>
+      <div class="modal-section">
+        <div class="modal-label">Typ</div>
+        <select class="modal-select" onchange="aF.typ=this.value;aF.art=0;renderModal()">
+          <option value="soft" ${aF.typ==='soft'?'selected':''}>Softgetränke (Harassen)</option>
+          <option value="wein" ${aF.typ==='wein'?'selected':''}>Wein (6er-Einheiten)</option>
+        </select>
+      </div>
+      <div class="modal-section">
+        <div class="modal-label">Artikel</div>
+        <select class="modal-select" onchange="aF.art=parseInt(this.value)">${artOptions(aF)}</select>
+      </div>
+      <div class="modal-section"><div class="modal-label">Verbrauchte Menge</div>${mengePicker(aF.menge,'aF')}</div>
+      <button class="action-btn action-btn-red" onclick="commitA()">Abgang buchen</button>
+    </div></div>`;
+  }
+
+  else if(modal==='bezug'){
+    const schiffOpts=SCHIFFE_K.map(s=>`<option value="${s.id}" ${bF.schiff===s.id?'selected':''}>${s.name}</option>`).join('');
+    root.innerHTML=`<div class="modal-overlay" onclick="closeModal()"><div class="modal-sheet" onclick="event.stopPropagation()">
+      <div class="modal-handle"></div>
+      <div class="modal-title">Bezug aus Bootshaus</div>
+      <div class="modal-sub">Der Bootshaus-Bestand wird automatisch reduziert.</div>
+      <div class="modal-section">
+        <div class="modal-label">Schiff</div>
+        <select class="modal-select" onchange="bF.schiff=this.value">${schiffOpts}</select>
+      </div>
+      <div class="modal-section">
+        <div class="modal-label">Typ</div>
+        <select class="modal-select" onchange="bF.typ=this.value;bF.art=0;renderModal()">
+          <option value="soft" ${bF.typ==='soft'?'selected':''}>Softgetränke (Harassen)</option>
+          <option value="wein" ${bF.typ==='wein'?'selected':''}>Wein (6er-Einheiten)</option>
+        </select>
+      </div>
+      <div class="modal-section">
+        <div class="modal-label">Artikel</div>
+        <select class="modal-select" onchange="bF.art=parseInt(this.value)">${artOptions(bF)}</select>
+      </div>
+      <div class="modal-section"><div class="modal-label">Menge</div>${mengePicker(bF.menge,'bF')}</div>
+      <button class="action-btn action-btn-green" onclick="commitB()">Bezug bestätigen ✓</button>
+    </div></div>`;
+  }
+}
+
+// ═══════════════════════════════════════
+// BUSINESS LOGIC
+// ═══════════════════════════════════════
+function adjust(id,typ,idx,delta){
+  if(!state[id])return;
+  state[id][typ][idx].bestand=Math.max(0,Math.round((state[id][typ][idx].bestand+delta)*2)/2);
+  state[id][typ][idx].updated=now();
+}
+
+function doZ(){
+  const {typ,art,menge,herkunft,vonSchiff}=zF;
+  const id=currentSchiff;
+  const name=(typ==='soft'?SOFT:WEIN)[art].name;
+  const einheit=typ==='wein'?'Einh.':'Hr.';
+  adjust(id,typ,art,+menge);
+  const von=herkunft==='lieferung'?'Lieferung':herkunft==='bootshaus'?'Bootshaus':vonSchiff;
+  if(herkunft==='bootshaus')adjust('Bootshaus',typ,art,-menge);
+  else if(herkunft==='schiff'&&state[vonSchiff])adjust(vonSchiff,typ,art,-menge);
+  addLog({typ:'Zubuchung',von,nach:id,artikel:name,menge,einheit});
+}
+function doA(){
+  const {typ,art,menge}=aF;
+  const id=currentSchiff;
+  const name=(typ==='soft'?SOFT:WEIN)[art].name;
+  const einheit=typ==='wein'?'Einh.':'Hr.';
+  adjust(id,typ,art,-menge);
+  addLog({typ:'Verbrauch',von:id,nach:'',artikel:name,menge,einheit});
+}
+function doB(){
+  const {schiff,typ,art,menge}=bF;
+  const name=(typ==='soft'?SOFT:WEIN)[art].name;
+  const einheit=typ==='wein'?'Einh.':'Hr.';
+  adjust('Bootshaus',typ,art,-menge);
+  addLog({typ:'Bezug',von:'Bootshaus',nach:schiff,artikel:name,menge,einheit});
+}
+
+function toggleOrder(typ,idx){
+  const id=currentSchiff;
+  state[id][typ][idx].bestellt=state[id][typ][idx].bestellt?0:1;
+  save();renderSchiff();
+}
+
+// ═══════════════════════════════════════
+// ACTIONS
+// ═══════════════════════════════════════
+function openZubuchung(){modal='zubuchung';renderModal();}
+function openAbgang(){modal='abgang';renderModal();}
+function openBezug(){modal='bezug';renderModal();}
+function closeModal(){modal=null;renderModal();}
+function quickZ(typ,idx){zF.typ=typ;zF.art=idx;openZubuchung();}
+function quickA(typ,idx){aF.typ=typ;aF.art=idx;openAbgang();}
+function commitZ(){doZ();closeModal();renderSchiff();renderLanding();}
+function commitA(){doA();closeModal();renderSchiff();renderLanding();}
+function commitB(){doB();closeModal();renderSchiff();}
+
+function printAlarm(id){
+  const alarms=[];
+  ['soft','wein'].forEach(typ=>{
+    (typ==='soft'?SOFT:WEIN).forEach((p,i)=>{
+      const r=state[id][typ][i];
+      if(getStatus(r.bestand,r.soll)!=='ok')alarms.push({...p,typ,r});
+    });
+  });
+  const w=window.open('','_blank');
+  w.document.write(`<html><head><title>Bestellliste ${id} · ${new Date().toLocaleDateString('de-CH')}</title>
+  <style>body{font-family:sans-serif;font-size:13px;padding:20px}h2{margin-bottom:4px}p{color:#666;margin-bottom:16px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #ddd;padding:8px 10px;text-align:left}th{background:#f5f5f5;font-weight:600}tr:nth-child(even){background:#fafafa}.bad{color:#ff3b30;font-weight:600}.warn{color:#ff9500;font-weight:600}</style></head>
+  <body><h2>Bestellliste · ${id}</h2><p>${new Date().toLocaleDateString('de-CH',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}</p>
+  <table><thead><tr><th>Artikel</th><th>Gebinde</th><th>Ist</th><th>Soll</th><th>Status</th></tr></thead><tbody>
+  ${alarms.map(a=>`<tr><td>${a.name}</td><td>${a.typ==='soft'?a.geb:'6er-Einh.'}</td>
+    <td>${fmtH(a.r.bestand,a.typ)}</td><td>${fmtH(a.r.soll,a.typ)}</td>
+    <td class="${a.r.bestand<=0?'bad':'warn'}">${a.r.bestand<=0?'LEER':'TIEF'}</td></tr>`).join('')}
+  </tbody></table></body></html>`);
+  w.print();
+}
+
+// ═══════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════
+renderLanding();
+</script>
+</body>
+</html>
