@@ -337,6 +337,73 @@ const WEIN = [
 // ═══════════════════════════════════════
 // STATE
 // ═══════════════════════════════════════
+// ═══════════════════════════════════════
+// SUPABASE
+// ═══════════════════════════════════════
+const SB_URL='https://ezgkryebktbamxyhemkv.supabase.co';
+const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV6Z2tyeWVia3RiYW14eWhlbWt2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc0ODY4ODksImV4cCI6MjA5MzA2Mjg4OX0.CZ0E_aCoCscgn4giXMgKoGhnKdgivrK9fgURbM0EKM0';
+const SB_HEADERS={'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY};
+
+async function sbGet(table,filter=''){
+  try{
+    const r=await fetch(`${SB_URL}/rest/v1/${table}?${filter}&limit=1000`,{headers:{...SB_HEADERS,'Accept':'application/json'}});
+    return r.ok?await r.json():null;
+  }catch(e){return null;}
+}
+async function sbUpsert(table,data){
+  try{
+    const r=await fetch(`${SB_URL}/rest/v1/${table}`,{method:'POST',headers:{...SB_HEADERS,'Prefer':'resolution=merge-duplicates'},body:JSON.stringify(data)});
+    return r.ok||r.status===201;
+  }catch(e){return false;}
+}
+async function sbInsert(table,data){
+  try{
+    const r=await fetch(`${SB_URL}/rest/v1/${table}`,{method:'POST',headers:SB_HEADERS,body:JSON.stringify(data)});
+    return r.ok||r.status===201;
+  }catch(e){return false;}
+}
+
+async function syncFromSB(){
+  updateSyncUI('syncing');
+  const items=await sbGet('lagerbestand');
+  if(!items){updateSyncUI('offline');return;}
+  items.forEach(it=>{
+    const st=it.standort,typ=it.typ,idx=it.artikel_index;
+    if(state[st]&&state[st][typ]&&state[st][typ][idx]!==undefined){
+      state[st][typ][idx].bestand=parseFloat(it.bestand)||0;
+      state[st][typ][idx].soll=parseFloat(it.soll)||0;
+      state[st][typ][idx].bestellt=it.bestellt?1:0;
+      state[st][typ][idx].updated=it.updated_at||'';
+    }
+  });
+  const logItems=await sbGet('transaktionen','order=zeitpunkt.desc');
+  if(logItems)log=logItems.map(t=>({zeit:t.zeitpunkt,typ:t.typ,von:t.von,nach:t.nach,artikel:t.artikel,menge:t.menge,einheit:t.einheit})).slice(0,200);
+  save();updateSyncUI('ok');
+  if(currentSchiff)renderSchiff();
+  renderLanding();
+}
+
+async function pushRow(st,typ,idx){
+  const r=state[st][typ][idx];
+  await sbUpsert('lagerbestand',{standort:st,typ,artikel_index:idx,bestand:r.bestand,soll:r.soll,bestellt:r.bestellt===1,updated_at:now()});
+}
+async function pushLog(e){
+  await sbInsert('transaktionen',{zeitpunkt:e.zeit||now(),typ:e.typ,von:e.von||'',nach:e.nach||'',artikel:e.artikel,menge:e.menge,einheit:e.einheit||''});
+}
+
+function updateSyncUI(status){
+  const el=document.getElementById('sync-schiff');
+  const el2=document.getElementById('sync-landing');
+  if(!el&&!el2)return;
+  const cfg={
+    syncing:{cls:'ok',txt:'Synchronisiere…'},
+    ok:{cls:'ok',txt:'Verbunden · Supabase'},
+    offline:{cls:'err',txt:'Offline – Daten lokal'},
+  };
+  const c=cfg[status]||cfg.offline;
+  [el,el2].forEach(e=>{if(e){e.className='sync-bar '+c.cls;e.innerHTML=`<div class="sync-dot"></div><span>${c.txt}</span>`;}});
+}
+
 function initState(){
   const s={};
   SCHIFFE_L.forEach(({id})=>{
@@ -721,7 +788,7 @@ function adjust(id,typ,idx,delta){
   state[id][typ][idx].updated=now();
 }
 
-function doZ(){
+async function doZ(){
   const {typ,art,menge,herkunft,vonSchiff}=zF;
   const id=currentSchiff;
   const name=(typ==='soft'?SOFT:WEIN)[art].name;
@@ -730,28 +797,41 @@ function doZ(){
   const von=herkunft==='lieferung'?'Lieferung':herkunft==='bootshaus'?'Bootshaus':vonSchiff;
   if(herkunft==='bootshaus')adjust('Bootshaus',typ,art,-menge);
   else if(herkunft==='schiff'&&state[vonSchiff])adjust(vonSchiff,typ,art,-menge);
-  addLog({typ:'Zubuchung',von,nach:id,artikel:name,menge,einheit});
+  const e={typ:'Zubuchung',von,nach:id,artikel:name,menge,einheit,zeit:now()};
+  addLog(e);
+  await pushRow(id,typ,art);
+  if(herkunft==='bootshaus')await pushRow('Bootshaus',typ,art);
+  else if(herkunft==='schiff'&&state[vonSchiff])await pushRow(vonSchiff,typ,art);
+  await pushLog(e);
 }
-function doA(){
+async function doA(){
   const {typ,art,menge}=aF;
   const id=currentSchiff;
   const name=(typ==='soft'?SOFT:WEIN)[art].name;
   const einheit=typ==='wein'?'Einh.':'Hr.';
   adjust(id,typ,art,-menge);
-  addLog({typ:'Verbrauch',von:id,nach:'',artikel:name,menge,einheit});
+  const e={typ:'Verbrauch',von:id,nach:'',artikel:name,menge,einheit,zeit:now()};
+  addLog(e);
+  await pushRow(id,typ,art);
+  await pushLog(e);
 }
-function doB(){
+async function doB(){
   const {schiff,typ,art,menge}=bF;
   const name=(typ==='soft'?SOFT:WEIN)[art].name;
   const einheit=typ==='wein'?'Einh.':'Hr.';
   adjust('Bootshaus',typ,art,-menge);
-  addLog({typ:'Bezug',von:'Bootshaus',nach:schiff,artikel:name,menge,einheit});
+  const e={typ:'Bezug',von:'Bootshaus',nach:schiff,artikel:name,menge,einheit,zeit:now()};
+  addLog(e);
+  await pushRow('Bootshaus',typ,art);
+  await pushLog(e);
 }
 
-function toggleOrder(typ,idx){
+async function toggleOrder(typ,idx){
   const id=currentSchiff;
   state[id][typ][idx].bestellt=state[id][typ][idx].bestellt?0:1;
-  save();renderSchiff();
+  save();
+  await pushRow(id,typ,idx);
+  renderSchiff();
 }
 
 // ═══════════════════════════════════════
@@ -763,9 +843,9 @@ function openBezug(){modal='bezug';renderModal();}
 function closeModal(){modal=null;renderModal();}
 function quickZ(typ,idx){zF.typ=typ;zF.art=idx;openZubuchung();}
 function quickA(typ,idx){aF.typ=typ;aF.art=idx;openAbgang();}
-function commitZ(){doZ();closeModal();renderSchiff();renderLanding();}
-function commitA(){doA();closeModal();renderSchiff();renderLanding();}
-function commitB(){doB();closeModal();renderSchiff();}
+async function commitZ(){await doZ();closeModal();renderSchiff();renderLanding();}
+async function commitA(){await doA();closeModal();renderSchiff();renderLanding();}
+async function commitB(){await doB();closeModal();renderSchiff();}
 
 function printAlarm(id){
   const alarms=[];
@@ -791,6 +871,8 @@ function printAlarm(id){
 // INIT
 // ═══════════════════════════════════════
 renderLanding();
+syncFromSB();
+setInterval(syncFromSB, 30000);
 </script>
 </body>
 </html>
