@@ -312,7 +312,7 @@ async function doSync(){
 
 // HELPERS
 function now(){return new Date().toISOString();}
-function fmtH(v,kat){const u=KATEGORIEN.find(k=>k.id===kat)?.einheit||'';if(v===0)return'0 '+u;if(v%1===0)return v+' '+u;return'½ '+u;}
+function fmtH(v,kat){const u=KATEGORIEN.find(k=>k.id===kat)?.einheit||'';if(v===0)return'0 '+u;const g=Math.floor(v);const h=v%1!==0;if(g===0)return'½ '+u;if(!h)return g+' '+u;return g+'½ '+u;}
 function fmtT(iso){if(!iso)return'–';try{const d=new Date(iso);return d.toLocaleDateString('de-CH',{day:'2-digit',month:'2-digit'})+' '+d.toLocaleTimeString('de-CH',{hour:'2-digit',minute:'2-digit'});}catch(e){return'';}}
 function fmtDate(iso){if(!iso)return'–';try{return new Date(iso).toLocaleDateString('de-CH',{day:'numeric',month:'long'});}catch(e){return'';}}
 function getStatus(b,s){if(b<=0)return'bad';if(s>0&&b<s)return'warn';return'ok';}
@@ -396,25 +396,26 @@ function renderDashboard(){
 
 // BESTELLUNGEN — 3-Stufen-Workflow
 function renderBestell(){
-  // Stufe 1: Offen — vom Schiff gemeldet
+  // IDs die bereits in Stufe 2 sind (nicht mehr in Stufe 1 zeigen)
+  const bereitsBestelltKeys=new Set(bestellungen.filter(b=>b.status==='bestellt'||b.status==='geliefert').map(b=>b.schiff+'_'+b.kat+'_'+b.idx));
+
+  // Stufe 1: Offen — vom Schiff gemeldet, noch NICHT bestellt
   const offen=[];
   SCHIFFE_L.forEach(({id,name,icon})=>{
     if(!state[id])return;
     KATEGORIEN.forEach(k=>{
       state[id][k.id].forEach((r,i)=>{
-        if(r.bestellt){
+        const key=id+'_'+k.id+'_'+i;
+        if(r.bestellt&&!bereitsBestelltKeys.has(key)){
           const p=PRODUKTE[k.id][i];
-          offen.push({schiff:id,schiffName:name,icon,artikel:p.name,geb:p.geb||'',kat:k.id,katLabel:k.label,idx:i,r,lief:p.lief,wb:p.wb});
+          offen.push({schiff:id,schiffName:name,icon,artikel:p.name,geb:p.geb||'',kat:k.id,katLabel:k.label,idx:i,r,lief:p.lief,wb:p.wb,key});
         }
       });
     });
   });
 
-  // Stufe 2: Beim Lieferanten bestellt
   const bestellt=bestellungen.filter(b=>b.status==='bestellt');
-
-  // Stufe 3: Geliefert (letzte 10)
-  const geliefert=bestellungen.filter(b=>b.status==='geliefert').slice(0,10);
+  const geliefertList=bestellungen.filter(b=>b.status==='geliefert').slice(0,10);
 
   let html='';
 
@@ -430,56 +431,62 @@ function renderBestell(){
         <div class="wf-icon" style="background:var(--orange-l)">📋</div>
         <div class="wf-info">
           <div class="wf-name">${it.artikel}</div>
-          <div class="wf-detail">${it.katLabel} · ${it.geb} · Lieferant: ${getLiefName(it.lief)}${it.wb?' ('+it.wb+')':''}</div>
+          <div class="wf-detail">${it.katLabel} · ${it.geb} · ${getLiefName(it.lief)}${it.wb?' ('+it.wb+')':''}</div>
           <div class="wf-schiff">${it.icon} ${it.schiffName}</div>
           <div style="display:flex;align-items:center;gap:8px;margin-top:6px">
             <span style="font-size:12px;color:var(--text3)">Menge:</span>
             <button class="me-m menge-edit-btn" onclick="changeMenge('${it.schiff}','${it.kat}',${it.idx},-0.5)">−</button>
-            <span class="menge-val">${fmtH(bestellMenge,it.kat)}</span>
+            <span style="font-size:15px;font-weight:700;min-width:50px;text-align:center">${fmtH(bestellMenge,it.kat)}</span>
             <button class="me-p menge-edit-btn" onclick="changeMenge('${it.schiff}','${it.kat}',${it.idx},0.5)">+</button>
           </div>
         </div>
         <div class="wf-actions">
-          <button class="wf-btn wf-btn-blue" onclick="bestellenBeiLieferant('${it.schiff}','${it.kat}',${it.idx})">Bestellen →</button>
+          <button class="wf-btn wf-btn-blue" onclick="bestellenBeiLieferant('${it.schiff}','${it.kat}',${it.idx},'${it.key}')">Bestellen →</button>
         </div>
       </div>`;
     });
     html+='</div>';
-    html+=`<div style="display:flex;gap:8px;margin-bottom:4px">
-      <button class="print-btn" style="flex:1" onclick="printListeGesamt()">🖨 Gesamtliste (Stardrinks)</button>
-      <button class="print-btn" style="flex:1" onclick="printListeProSchiff()">🖨 Pro Schiff</button>
-    </div>`;
   }
 
+  // Manuell hinzufügen
+  html+=`<button class="print-btn" style="margin-bottom:4px" onclick="openManuelHinzu()">+ Manuell hinzufügen</button>`;
+  html+=`<div style="display:flex;gap:8px;margin-bottom:4px">
+    <button class="print-btn" style="flex:1" onclick="printListeGesamt()">🖨 Gesamtliste</button>
+    <button class="print-btn" style="flex:1" onclick="printListeProSchiff()">🖨 Pro Schiff</button>
+  </div>`;
+
   // === STUFE 2: BESTELLT ===
-  html+=`<div class="stitle" style="margin-top:20px">🚚 Stufe 2 — Beim Lieferanten bestellt (${bestellt.length})</div>`;
+  html+=`<div class="stitle" style="margin-top:16px">🚚 Stufe 2 — Beim Lieferanten bestellt (${bestellt.length})</div>`;
   if(!bestellt.length){
     html+=`<div class="card"><div class="empty" style="padding:20px"><div class="empty-sub">Noch nichts bestellt</div></div></div>`;
   } else {
     html+=`<div class="card">`;
     bestellt.forEach(b=>{
+      // Split-Anzeige
+      const splits=b.splits||[{schiff:b.zielSchiff||b.schiff,menge:b.menge}];
+      const splitHtml=splits.map((sp,si)=>`
+        <div style="display:flex;align-items:center;gap:6px;margin-top:5px;flex-wrap:wrap">
+          <select style="font-size:12px;padding:2px 6px;border:1px solid var(--border);border-radius:6px" onchange="changeSplitSchiff('${b.id}',${si},this.value)">
+            ${SCHIFFE_L.map(s=>`<option value="${s.id}" ${sp.schiff===s.id?'selected':''}>${s.icon} ${s.name}</option>`).join('')}
+          </select>
+          <button class="me-m menge-edit-btn" onclick="changeSplitMenge('${b.id}',${si},-0.5)">−</button>
+          <span style="font-size:14px;font-weight:700;min-width:50px;text-align:center">${fmtH(sp.menge,b.kat)}</span>
+          <button class="me-p menge-edit-btn" onclick="changeSplitMenge('${b.id}',${si},0.5)">+</button>
+          ${splits.length>1?`<button onclick="removeSplit('${b.id}',${si})" style="border:none;background:var(--red-l);color:var(--red);border-radius:50%;width:20px;height:20px;cursor:pointer;font-size:12px">×</button>`:''}
+        </div>`).join('');
+
       html+=`<div class="workflow-item">
         <div class="wf-icon" style="background:var(--blue-l)">🚚</div>
         <div class="wf-info">
           <div class="wf-name">${b.artikel}</div>
           <div class="wf-detail">${b.katLabel} · ${getLiefName(b.lief)} · Bestellt: ${fmtDate(b.datum)}</div>
-          <div class="wf-schiff">${b.icon} ${b.schiffName}</div>
-          <div style="display:flex;align-items:center;gap:8px;margin-top:6px">
-            <span style="font-size:12px;color:var(--text3)">Menge:</span>
-            <button class="me-m menge-edit-btn" onclick="changeBestellMenge('${b.id}',-0.5)">−</button>
-            <span class="menge-val" id="bm_${b.id}">${fmtH(b.menge,b.kat)}</span>
-            <button class="me-p menge-edit-btn" onclick="changeBestellMenge('${b.id}',0.5)">+</button>
-          </div>
-          <div style="margin-top:6px">
-            <span style="font-size:11px;color:var(--text3)">Zielschiff: </span>
-            <select style="font-size:12px;padding:2px 6px;border:1px solid var(--border);border-radius:6px" onchange="changeZielSchiff('${b.id}',this.value)">
-              ${SCHIFFE_L.map(s=>`<option value="${s.id}" ${b.zielSchiff===s.id?'selected':''}>${s.icon} ${s.name}</option>`).join('')}
-            </select>
-          </div>
+          <div style="font-size:12px;color:var(--text3);margin-top:4px">Total: <strong>${fmtH(b.menge,b.kat)}</strong> → Verteilt auf:</div>
+          ${splitHtml}
+          <button onclick="addSplit('${b.id}')" style="margin-top:6px;font-size:11px;padding:3px 8px;border:1px dashed var(--border);border-radius:6px;background:transparent;cursor:pointer;color:var(--text3)">+ Weiteres Schiff</button>
         </div>
         <div class="wf-actions">
           <button class="wf-btn wf-btn-green" onclick="geliefert('${b.id}')">Geliefert ✓</button>
-          <button class="wf-btn wf-btn-gray" onclick="zurueckZuOffen('${b.id}')">Zurück</button>
+          <button class="wf-btn wf-btn-gray" style="margin-top:4px" onclick="zurueckZuOffen('${b.id}')">Zurück</button>
         </div>
       </div>`;
     });
@@ -488,15 +495,16 @@ function renderBestell(){
   }
 
   // === STUFE 3: GELIEFERT ===
-  if(geliefert.length){
-    html+=`<div class="stitle" style="margin-top:20px">✅ Letzte Lieferungen</div><div class="card">`;
-    geliefert.forEach(b=>{
+  if(geliefertList.length){
+    html+=`<div class="stitle" style="margin-top:16px">✅ Letzte Lieferungen</div><div class="card">`;
+    geliefertList.forEach(b=>{
+      const splits=b.splits||[{schiff:b.zielSchiff||b.schiff,menge:b.menge}];
       html+=`<div class="workflow-item">
         <div class="wf-icon" style="background:var(--green-l)">✅</div>
         <div class="wf-info">
           <div class="wf-name">${b.artikel}</div>
-          <div class="wf-detail">${b.katLabel} · ${fmtH(b.menge,b.kat)} geliefert · ${fmtDate(b.geliefertDatum)}</div>
-          <div class="wf-schiff">${b.icon} ${b.zielSchiff||b.schiffName}</div>
+          <div class="wf-detail">${b.katLabel} · ${fmtH(b.menge,b.kat)} · ${fmtDate(b.geliefertDatum)}</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:3px">${splits.map(sp=>{const i=SCHIFFE_L.find(s=>s.id===sp.schiff);return(i?.icon||'')+(i?.name||sp.schiff)+': '+fmtH(sp.menge,b.kat);}).join(' · ')}</div>
         </div>
       </div>`;
     });
@@ -634,19 +642,28 @@ async function geliefert(bid){
   b.status='geliefert';
   b.geliefertDatum=now();
   saveBest();
-  // Bestand erhöhen auf Zielschiff
-  const ziel=b.zielSchiff||b.schiff;
-  const idx=PRODUKTE[b.kat].findIndex(p=>p.name===b.artikel);
-  if(idx>=0&&state[ziel]){
-    state[ziel][b.kat][idx].bestand=Math.round((state[ziel][b.kat][idx].bestand+b.menge)*2)/2;
-    state[ziel][b.kat][idx].bestellt=0;
-    state[ziel][b.kat][idx].bestellMenge=0;
-    save();
-    await rpc('adjust_bestand',{p_standort:ziel,p_kat:b.kat,p_artikel_index:idx,p_delta:b.menge});
-    await rpc('set_bestand_meta',{p_standort:b.schiff,p_kat:b.kat,p_artikel_index:idx,p_bestellt:false,p_bestell_menge:0});
+
+  // Splits nutzen falls vorhanden, sonst Fallback
+  const splits=b.splits&&b.splits.length>0?b.splits:[{schiff:b.zielSchiff||b.schiff,menge:b.menge}];
+
+  for(const sp of splits){
+    const ziel=sp.schiff;
+    const idx=PRODUKTE[b.kat].findIndex(p=>p.name===b.artikel);
+    if(idx>=0&&state[ziel]){
+      // Bestand erhöhen atomar via Supabase Funktion
+      await rpc('adjust_bestand',{p_standort:ziel,p_kat:b.kat,p_artikel_index:idx,p_delta:sp.menge});
+      // Log
+      await fetch(`${SB}/rest/v1/transaktionen2`,{method:'POST',headers:H,
+        body:JSON.stringify({zeitpunkt:now(),typ:'Lieferung',von:'Lieferant',nach:ziel,artikel:b.artikel,menge:sp.menge,einheit:KATEGORIEN.find(k=>k.id===b.kat)?.einheit||'',kat:b.kat})});
+    }
   }
-  // Log
-  await fetch(`${SB}/rest/v1/transaktionen2`,{method:'POST',headers:H,body:JSON.stringify({zeitpunkt:now(),typ:'Lieferung',von:'Lieferant',nach:ziel,artikel:b.artikel,menge:b.menge,einheit:KATEGORIEN.find(k=>k.id===b.kat)?.einheit||'',kat:b.kat})});
+
+  // Bestellt-Flag auf dem ursprünglichen Schiff entfernen
+  const origIdx=PRODUKTE[b.kat].findIndex(p=>p.name===b.artikel);
+  if(origIdx>=0){
+    await rpc('set_bestand_meta',{p_standort:b.schiff,p_kat:b.kat,p_artikel_index:origIdx,p_bestellt:false,p_bestell_menge:0});
+  }
+
   await doSync();
 }
 
