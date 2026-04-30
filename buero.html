@@ -624,15 +624,18 @@ async function bestellenBeiLieferant(schiff,kat,idx){
   const r=state[schiff][kat][idx];
   const p=PRODUKTE[kat][idx];
   const info=SCHIFFE_L.find(s=>s.id===schiff);
+  const menge=Math.max(1,Math.round(r.bestellMenge||1));
   const b={
     id:Date.now()+'_'+Math.random().toString(36).slice(2),
+    key:schiff+'_'+kat+'_'+idx,
+    idx:idx,
     schiff,schiffName:info.name,icon:info.icon,
     artikel:p.name,geb:p.geb||'',kat,katLabel:KATEGORIEN.find(k=>k.id===kat)?.label||'',
-    menge:r.bestellMenge||1,lief:p.lief,wb:p.wb||'',
-    status:'bestellt',datum:now(),zielSchiff:schiff
+    menge,lief:p.lief,wb:p.wb||'',
+    status:'bestellt',datum:now(),
+    splits:[{schiff,menge}]
   };
   bestellungen.unshift(b);saveBest();
-  // Schiff-Meldung bleibt (bestellt=true) bis geliefert
   renderPage();
 }
 
