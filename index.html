@@ -359,23 +359,31 @@ let bF={schiff:'MW Neptun',kat:'soft',art:0,menge:0.5};
 // SYNC
 // ════════════════════════════════════════
 let isSyncing=false;
+const localUpdated={};
+function markLocal(st,k,i){localUpdated[`${st}_${k}_${i}`]=Date.now();}
+function isLocalNewer(st,k,i,serverTime){
+  const local=localUpdated[`${st}_${k}_${i}`]||0;
+  const server=new Date(serverTime||0).getTime();
+  return local>server;
+}
+
 async function doSync(){
   if(isSyncing)return;
   isSyncing=true;
   setSyncUI('syncing');
-  // Load lagerbestand
   const items=await sbGet('lagerbestand2');
   if(items){
     items.forEach(it=>{
-      const {standort,kat,artikel_index:idx,bestand,soll,bestellt}=it;
+      const {standort,kat,artikel_index:idx,bestand,soll,bestellt,updated_at}=it;
       if(state[standort]&&state[standort][kat]&&state[standort][kat][idx]!==undefined){
-        state[standort][kat][idx].bestand=parseFloat(bestand)||0;
-        state[standort][kat][idx].soll=parseFloat(soll)||0;
-        state[standort][kat][idx].bestellt=bestellt?1:0;
+        if(!isLocalNewer(standort,kat,idx,updated_at)){
+          state[standort][kat][idx].bestand=parseFloat(bestand)||0;
+          state[standort][kat][idx].soll=parseFloat(soll)||0;
+          state[standort][kat][idx].bestellt=bestellt?1:0;
+        }
       }
     });
   }
-  // Load log
   const li=await sbGet('transaktionen2','order=zeitpunkt.desc');
   if(li)log=li.map(t=>({zeit:t.zeitpunkt,typ:t.typ,von:t.von,nach:t.nach,artikel:t.artikel,menge:t.menge,einheit:t.einheit,kat:t.kat})).slice(0,200);
   save();
@@ -719,15 +727,17 @@ async function doZ(){
   const von=herkunft==='lieferung'?'Lieferung':herkunft==='bootshaus'?'Bootshaus':vonSchiff;
   // Optimistic local update
   state[id][kat][art].bestand=Math.max(0,Math.round((state[id][kat][art].bestand+menge)*2)/2);
+  markLocal(id,kat,art);
   if(herkunft==='bootshaus'&&state['Bootshaus']){
     state['Bootshaus'][kat][art].bestand=Math.max(0,Math.round((state['Bootshaus'][kat][art].bestand-menge)*2)/2);
+    markLocal('Bootshaus',kat,art);
   } else if(herkunft==='schiff'&&state[vonSchiff]){
     state[vonSchiff][kat][art].bestand=Math.max(0,Math.round((state[vonSchiff][kat][art].bestand-menge)*2)/2);
+    markLocal(vonSchiff,kat,art);
   }
   save();
   const e={zeit:now(),typ:'Zubuchung',von,nach:id,artikel:name,menge,einheit,kat};
   log.unshift(e);save();
-  // Push changes to DB (change-based)
   await pushChange(id,kat,art,+menge);
   if(herkunft==='bootshaus')await pushChange('Bootshaus',kat,art,-menge);
   else if(herkunft==='schiff'&&state[vonSchiff])await pushChange(vonSchiff,kat,art,-menge);
@@ -739,8 +749,8 @@ async function doA(){
   const id=curSchiff;
   const name=PRODUKTE[kat][art].name;
   const einheit=KATEGORIEN.find(k=>k.id===kat)?.einheit||'';
-  // Optimistic
   state[id][kat][art].bestand=Math.max(0,Math.round((state[id][kat][art].bestand-menge)*2)/2);
+  markLocal(id,kat,art);
   save();
   const e={zeit:now(),typ:'Verbrauch',von:id,nach:'',artikel:name,menge,einheit,kat};
   log.unshift(e);save();
@@ -752,8 +762,10 @@ async function doB(){
   const {schiff,kat,art,menge}=bF;
   const name=PRODUKTE[kat][art].name;
   const einheit=KATEGORIEN.find(k=>k.id===kat)?.einheit||'';
-  // Optimistic
-  if(state['Bootshaus'])state['Bootshaus'][kat][art].bestand=Math.max(0,Math.round((state['Bootshaus'][kat][art].bestand-menge)*2)/2);
+  if(state['Bootshaus']){
+    state['Bootshaus'][kat][art].bestand=Math.max(0,Math.round((state['Bootshaus'][kat][art].bestand-menge)*2)/2);
+    markLocal('Bootshaus',kat,art);
+  }
   save();
   const e={zeit:now(),typ:'Bezug',von:'Bootshaus',nach:schiff,artikel:name,menge,einheit,kat};
   log.unshift(e);save();
@@ -765,6 +777,7 @@ async function toggleOrder(kat,idx){
   const id=curSchiff;
   const newVal=state[id][kat][idx].bestellt?0:1;
   state[id][kat][idx].bestellt=newVal;
+  markLocal(id,kat,idx);
   save();renderSchiff();
   await pushBestellt(id,kat,idx,newVal===1);
 }
