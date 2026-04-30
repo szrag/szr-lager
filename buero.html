@@ -239,6 +239,14 @@ let curPage='dashboard',sollKat='soft',sollSchiff='MS Rhystern';
 
 // SYNC
 let isSyncing=false;
+const localUpdated={};
+function markLocal(st,k,i){localUpdated[`${st}_${k}_${i}`]=Date.now();}
+function isLocalNewer(st,k,i,serverTime){
+  const local=localUpdated[`${st}_${k}_${i}`]||0;
+  const server=new Date(serverTime||0).getTime();
+  return local>server;
+}
+
 async function doSync(){
   if(isSyncing)return;
   isSyncing=true;
@@ -249,11 +257,13 @@ async function doSync(){
   const items=await sbGet('lagerbestand2');
   if(items){
     items.forEach(it=>{
-      const{standort,kat,artikel_index:idx,bestand,soll,bestellt}=it;
+      const{standort,kat,artikel_index:idx,bestand,soll,bestellt,updated_at}=it;
       if(state[standort]&&state[standort][kat]&&state[standort][kat][idx]!==undefined){
-        state[standort][kat][idx].bestand=parseFloat(bestand)||0;
-        state[standort][kat][idx].soll=parseFloat(soll)||0;
-        state[standort][kat][idx].bestellt=bestellt?1:0;
+        if(!isLocalNewer(standort,kat,idx,updated_at)){
+          state[standort][kat][idx].bestand=parseFloat(bestand)||0;
+          state[standort][kat][idx].soll=parseFloat(soll)||0;
+          state[standort][kat][idx].bestellt=bestellt?1:0;
+        }
       }
     });
   }
@@ -480,8 +490,8 @@ function renderLog(){
 async function setSoll(schiff,kat,idx,val){
   const soll=parseFloat(val)||0;
   state[schiff][kat][idx].soll=soll;
+  markLocal(schiff,kat,idx);
   save();updateBadge();
-  // Fetch current bestand from DB first
   const cur=await sbGet('lagerbestand2',`standort=eq.${encodeURIComponent(schiff)}&kat=eq.${kat}&artikel_index=eq.${idx}`);
   let curBestand=state[schiff][kat][idx].bestand;
   if(cur&&cur.length>0)curBestand=parseFloat(cur[0].bestand)||0;
@@ -490,6 +500,7 @@ async function setSoll(schiff,kat,idx,val){
 
 async function confirmOrder(schiff,kat,idx){
   state[schiff][kat][idx].bestellt=0;
+  markLocal(schiff,kat,idx);
   save();
   const cur=await sbGet('lagerbestand2',`standort=eq.${encodeURIComponent(schiff)}&kat=eq.${kat}&artikel_index=eq.${idx}`);
   let curBestand=state[schiff][kat][idx].bestand,curSoll=state[schiff][kat][idx].soll;
