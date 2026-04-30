@@ -226,7 +226,7 @@ const SB='https://ezgkryebktbamxyhemkv.supabase.co';
 const KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV6Z2tyeWVia3RiYW14eWhlbWt2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc0ODY4ODksImV4cCI6MjA5MzA2Mjg4OX0.CZ0E_aCoCscgn4giXMgKoGhnKdgivrK9fgURbM0EKM0';
 const H={'Content-Type':'application/json','apikey':KEY,'Authorization':'Bearer '+KEY};
 async function sbGet(t,q=''){try{const r=await fetch(`${SB}/rest/v1/${t}?${q}&limit=2000`,{headers:{...H,'Accept':'application/json'}});return r.ok?await r.json():null;}catch(e){return null;}}
-async function sbUpsert(t,d){try{const r=await fetch(`${SB}/rest/v1/${t}`,{method:'POST',headers:{...H,'Prefer':'resolution=merge-duplicates'},body:JSON.stringify(d)});return r.ok||r.status===201;}catch(e){return false;}}
+async function rpc(fn,params){try{await fetch(`${SB}/rest/v1/rpc/${fn}`,{method:'POST',headers:H,body:JSON.stringify(params)});}catch(e){}}
 
 // STATE
 function initState(){const s={};SCHIFFE_L.forEach(({id})=>{s[id]={};KATEGORIEN.forEach(k=>{s[id][k.id]=PRODUKTE[k.id].map(()=>({bestand:0,soll:0,bestellt:0}));});});return s;}
@@ -237,16 +237,8 @@ function save(){try{localStorage.setItem('szr_v5',JSON.stringify(state));localSt
 
 let curPage='dashboard',sollKat='soft',sollSchiff='MS Rhystern';
 
-// SYNC
+// SYNC — always trust DB
 let isSyncing=false;
-const localUpdated={};
-function markLocal(st,k,i){localUpdated[`${st}_${k}_${i}`]=Date.now();}
-function isLocalNewer(st,k,i,serverTime){
-  const local=localUpdated[`${st}_${k}_${i}`]||0;
-  const server=new Date(serverTime||0).getTime();
-  return local>server;
-}
-
 async function doSync(){
   if(isSyncing)return;
   isSyncing=true;
@@ -257,13 +249,11 @@ async function doSync(){
   const items=await sbGet('lagerbestand2');
   if(items){
     items.forEach(it=>{
-      const{standort,kat,artikel_index:idx,bestand,soll,bestellt,updated_at}=it;
+      const{standort,kat,artikel_index:idx,bestand,soll,bestellt}=it;
       if(state[standort]&&state[standort][kat]&&state[standort][kat][idx]!==undefined){
-        if(!isLocalNewer(standort,kat,idx,updated_at)){
-          state[standort][kat][idx].bestand=parseFloat(bestand)||0;
-          state[standort][kat][idx].soll=parseFloat(soll)||0;
-          state[standort][kat][idx].bestellt=bestellt?1:0;
-        }
+        state[standort][kat][idx].bestand=parseFloat(bestand)||0;
+        state[standort][kat][idx].soll=parseFloat(soll)||0;
+        state[standort][kat][idx].bestellt=bestellt?1:0;
       }
     });
   }
@@ -490,23 +480,16 @@ function renderLog(){
 async function setSoll(schiff,kat,idx,val){
   const soll=parseFloat(val)||0;
   state[schiff][kat][idx].soll=soll;
-  markLocal(schiff,kat,idx);
   save();updateBadge();
-  const cur=await sbGet('lagerbestand2',`standort=eq.${encodeURIComponent(schiff)}&kat=eq.${kat}&artikel_index=eq.${idx}`);
-  let curBestand=state[schiff][kat][idx].bestand;
-  if(cur&&cur.length>0)curBestand=parseFloat(cur[0].bestand)||0;
-  await sbUpsert('lagerbestand2',{standort:schiff,kat,artikel_index:idx,bestand:curBestand,soll,bestellt:state[schiff][kat][idx].bestellt===1,updated_at:now()});
+  await rpc('set_bestand_meta',{p_standort:schiff,p_kat:kat,p_artikel_index:idx,p_soll:soll});
+  await doSync();
 }
 
 async function confirmOrder(schiff,kat,idx){
   state[schiff][kat][idx].bestellt=0;
-  markLocal(schiff,kat,idx);
-  save();
-  const cur=await sbGet('lagerbestand2',`standort=eq.${encodeURIComponent(schiff)}&kat=eq.${kat}&artikel_index=eq.${idx}`);
-  let curBestand=state[schiff][kat][idx].bestand,curSoll=state[schiff][kat][idx].soll;
-  if(cur&&cur.length>0){curBestand=parseFloat(cur[0].bestand)||0;curSoll=parseFloat(cur[0].soll)||0;}
-  await sbUpsert('lagerbestand2',{standort:schiff,kat,artikel_index:idx,bestand:curBestand,soll:curSoll,bestellt:false,updated_at:now()});
-  renderPage();
+  save();renderPage();
+  await rpc('set_bestand_meta',{p_standort:schiff,p_kat:kat,p_artikel_index:idx,p_bestellt:false});
+  await doSync();
 }
 
 function printBestell(){
