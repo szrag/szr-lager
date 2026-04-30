@@ -437,9 +437,9 @@ function renderBestell(){
           <div class="wf-schiff">${it.icon} ${it.schiffName}</div>
           <div style="display:flex;align-items:center;gap:8px;margin-top:6px">
             <span style="font-size:12px;color:var(--text3)">Menge:</span>
-            <button class="me-m menge-edit-btn" onclick="changeMenge('${it.schiff}','${it.kat}',${it.idx},-0.5)">−</button>
+            <button class="me-m menge-edit-btn" onclick="changeMenge('${it.schiff}','${it.kat}',${it.idx},-1)">−</button>
             <span style="font-size:15px;font-weight:700;min-width:50px;text-align:center">${fmtH(bestellMenge,it.kat)}</span>
-            <button class="me-p menge-edit-btn" onclick="changeMenge('${it.schiff}','${it.kat}',${it.idx},0.5)">+</button>
+            <button class="me-p menge-edit-btn" onclick="changeMenge('${it.schiff}','${it.kat}',${it.idx},1)">+</button>
           </div>
         </div>
         <div class="wf-actions">
@@ -604,7 +604,7 @@ async function setSoll(schiff,kat,idx,val){
 
 async function changeMenge(schiff,kat,idx,delta){
   const r=state[schiff][kat][idx];
-  const newMenge=Math.max(0.5,Math.round((r.bestellMenge+delta)*2)/2);
+  const newMenge=Math.max(1,Math.round(r.bestellMenge+delta)); // Nur ganze Harassen!
   state[schiff][kat][idx].bestellMenge=newMenge;
   save();renderPage();
   await rpc('set_bestand_meta',{p_standort:schiff,p_kat:kat,p_artikel_index:idx,p_bestellt:true,p_bestell_menge:newMenge});
@@ -707,7 +707,7 @@ function changeSplitSchiff(bid,si,val){
 function changeSplitMenge(bid,si,delta){
   const b=bestellungen.find(b=>b.id===bid);
   if(!b||!b.splits||!b.splits[si])return;
-  b.splits[si].menge=Math.max(1,Math.round(b.splits[si].menge+delta));
+  b.splits[si].menge=Math.max(0.5,Math.round((b.splits[si].menge+delta)*2)/2); // Halbe erlaubt
   saveBest();renderPage();
 }
 
