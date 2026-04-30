@@ -359,13 +359,6 @@ let bF={schiff:'MW Neptun',kat:'soft',art:0,menge:0.5};
 // SYNC
 // ════════════════════════════════════════
 let isSyncing=false;
-const localUpdated={};
-function markLocal(st,k,i){localUpdated[`${st}_${k}_${i}`]=Date.now();}
-function isLocalNewer(st,k,i,serverTime){
-  const local=localUpdated[`${st}_${k}_${i}`]||0;
-  const server=new Date(serverTime||0).getTime();
-  return local>server;
-}
 
 async function doSync(){
   if(isSyncing)return;
@@ -374,13 +367,11 @@ async function doSync(){
   const items=await sbGet('lagerbestand2');
   if(items){
     items.forEach(it=>{
-      const {standort,kat,artikel_index:idx,bestand,soll,bestellt,updated_at}=it;
+      const {standort,kat,artikel_index:idx,bestand,soll,bestellt}=it;
       if(state[standort]&&state[standort][kat]&&state[standort][kat][idx]!==undefined){
-        if(!isLocalNewer(standort,kat,idx,updated_at)){
-          state[standort][kat][idx].bestand=parseFloat(bestand)||0;
-          state[standort][kat][idx].soll=parseFloat(soll)||0;
-          state[standort][kat][idx].bestellt=bestellt?1:0;
-        }
+        state[standort][kat][idx].bestand=parseFloat(bestand)||0;
+        state[standort][kat][idx].soll=parseFloat(soll)||0;
+        state[standort][kat][idx].bestellt=bestellt?1:0;
       }
     });
   }
@@ -406,37 +397,37 @@ function setSyncUI(status){
   });
 }
 
-// CHANGE-BASED: send delta, not absolute value
-async function pushChange(standort,kat,idx,delta,setBestellt=null){
-  // First get current from DB
-  const cur=await sbGet('lagerbestand2',`standort=eq.${encodeURIComponent(standort)}&kat=eq.${kat}&artikel_index=eq.${idx}`);
-  let curBestand=0,curSoll=state[standort][kat][idx].soll,curBestellt=state[standort][kat][idx].bestellt===1;
-  if(cur&&cur.length>0){curBestand=parseFloat(cur[0].bestand)||0;curSoll=parseFloat(cur[0].soll)||0;}
-  const newBestand=Math.max(0,Math.round((curBestand+delta)*2)/2);
-  const newBestellt=setBestellt!==null?setBestellt:curBestellt;
-  await sbUpsert('lagerbestand2',{standort,kat,artikel_index:idx,bestand:newBestand,soll:curSoll,bestellt:newBestellt,updated_at:new Date().toISOString()});
-  // Update local state with actual DB value
-  state[standort][kat][idx].bestand=newBestand;
-  state[standort][kat][idx].bestellt=newBestellt?1:0;
-  save();
+// ════════════════════════════════════════
+// PUSH — ATOMIC via Supabase Functions
+// ════════════════════════════════════════
+async function pushDelta(standort,kat,idx,delta){
+  try{
+    await fetch(`${SB}/rest/v1/rpc/adjust_bestand`,{
+      method:'POST',
+      headers:H,
+      body:JSON.stringify({p_standort:standort,p_kat:kat,p_artikel_index:idx,p_delta:delta})
+    });
+  }catch(e){}
 }
 
 async function pushBestellt(standort,kat,idx,val){
-  const cur=await sbGet('lagerbestand2',`standort=eq.${encodeURIComponent(standort)}&kat=eq.${kat}&artikel_index=eq.${idx}`);
-  let curBestand=state[standort][kat][idx].bestand,curSoll=state[standort][kat][idx].soll;
-  if(cur&&cur.length>0){curBestand=parseFloat(cur[0].bestand)||0;curSoll=parseFloat(cur[0].soll)||0;}
-  await sbUpsert('lagerbestand2',{standort,kat,artikel_index:idx,bestand:curBestand,soll:curSoll,bestellt:val,updated_at:new Date().toISOString()});
-  state[standort][kat][idx].bestellt=val?1:0;
-  save();
+  try{
+    await fetch(`${SB}/rest/v1/rpc/set_bestand_meta`,{
+      method:'POST',
+      headers:H,
+      body:JSON.stringify({p_standort:standort,p_kat:kat,p_artikel_index:idx,p_bestellt:val})
+    });
+  }catch(e){}
 }
 
-async function pushSoll(standort,kat,idx,soll){
-  const cur=await sbGet('lagerbestand2',`standort=eq.${encodeURIComponent(standort)}&kat=eq.${kat}&artikel_index=eq.${idx}`);
-  let curBestand=state[standort][kat][idx].bestand;
-  if(cur&&cur.length>0)curBestand=parseFloat(cur[0].bestand)||0;
-  await sbUpsert('lagerbestand2',{standort,kat,artikel_index:idx,bestand:curBestand,soll,bestellt:state[standort][kat][idx].bestellt===1,updated_at:new Date().toISOString()});
-  state[standort][kat][idx].soll=soll;
-  save();
+async function pushSollMeta(standort,kat,idx,soll){
+  try{
+    await fetch(`${SB}/rest/v1/rpc/set_bestand_meta`,{
+      method:'POST',
+      headers:H,
+      body:JSON.stringify({p_standort:standort,p_kat:kat,p_artikel_index:idx,p_soll:soll})
+    });
+  }catch(e){}
 }
 
 async function pushLog(e){
@@ -727,21 +718,20 @@ async function doZ(){
   const von=herkunft==='lieferung'?'Lieferung':herkunft==='bootshaus'?'Bootshaus':vonSchiff;
   // Optimistic local update
   state[id][kat][art].bestand=Math.max(0,Math.round((state[id][kat][art].bestand+menge)*2)/2);
-  markLocal(id,kat,art);
-  if(herkunft==='bootshaus'&&state['Bootshaus']){
+  if(herkunft==='bootshaus'&&state['Bootshaus'])
     state['Bootshaus'][kat][art].bestand=Math.max(0,Math.round((state['Bootshaus'][kat][art].bestand-menge)*2)/2);
-    markLocal('Bootshaus',kat,art);
-  } else if(herkunft==='schiff'&&state[vonSchiff]){
+  else if(herkunft==='schiff'&&state[vonSchiff])
     state[vonSchiff][kat][art].bestand=Math.max(0,Math.round((state[vonSchiff][kat][art].bestand-menge)*2)/2);
-    markLocal(vonSchiff,kat,art);
-  }
   save();
   const e={zeit:now(),typ:'Zubuchung',von,nach:id,artikel:name,menge,einheit,kat};
   log.unshift(e);save();
-  await pushChange(id,kat,art,+menge);
-  if(herkunft==='bootshaus')await pushChange('Bootshaus',kat,art,-menge);
-  else if(herkunft==='schiff'&&state[vonSchiff])await pushChange(vonSchiff,kat,art,-menge);
+  // Atomic push to DB
+  await pushDelta(id,kat,art,+menge);
+  if(herkunft==='bootshaus')await pushDelta('Bootshaus',kat,art,-menge);
+  else if(herkunft==='schiff'&&state[vonSchiff])await pushDelta(vonSchiff,kat,art,-menge);
   await pushLog(e);
+  // Sync to get actual DB values
+  await doSync();
 }
 
 async function doA(){
@@ -750,36 +740,35 @@ async function doA(){
   const name=PRODUKTE[kat][art].name;
   const einheit=KATEGORIEN.find(k=>k.id===kat)?.einheit||'';
   state[id][kat][art].bestand=Math.max(0,Math.round((state[id][kat][art].bestand-menge)*2)/2);
-  markLocal(id,kat,art);
   save();
   const e={zeit:now(),typ:'Verbrauch',von:id,nach:'',artikel:name,menge,einheit,kat};
   log.unshift(e);save();
-  await pushChange(id,kat,art,-menge);
+  await pushDelta(id,kat,art,-menge);
   await pushLog(e);
+  await doSync();
 }
 
 async function doB(){
   const {schiff,kat,art,menge}=bF;
   const name=PRODUKTE[kat][art].name;
   const einheit=KATEGORIEN.find(k=>k.id===kat)?.einheit||'';
-  if(state['Bootshaus']){
+  if(state['Bootshaus'])
     state['Bootshaus'][kat][art].bestand=Math.max(0,Math.round((state['Bootshaus'][kat][art].bestand-menge)*2)/2);
-    markLocal('Bootshaus',kat,art);
-  }
   save();
   const e={zeit:now(),typ:'Bezug',von:'Bootshaus',nach:schiff,artikel:name,menge,einheit,kat};
   log.unshift(e);save();
-  await pushChange('Bootshaus',kat,art,-menge);
+  await pushDelta('Bootshaus',kat,art,-menge);
   await pushLog(e);
+  await doSync();
 }
 
 async function toggleOrder(kat,idx){
   const id=curSchiff;
   const newVal=state[id][kat][idx].bestellt?0:1;
   state[id][kat][idx].bestellt=newVal;
-  markLocal(id,kat,idx);
   save();renderSchiff();
   await pushBestellt(id,kat,idx,newVal===1);
+  await doSync();
 }
 
 // ════════════════════════════════════════
