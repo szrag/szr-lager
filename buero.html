@@ -398,10 +398,15 @@ function renderDashboard(){
 
 // BESTELLUNGEN — 3-Stufen-Workflow
 function renderBestell(){
-  // IDs die bereits in Stufe 2 sind (nicht mehr in Stufe 1 zeigen)
-  const bereitsBestelltKeys=new Set(bestellungen.filter(b=>b.status==='bestellt'||b.status==='geliefert').map(b=>b.schiff+'_'+b.kat+'_'+b.idx));
+  // Keys die bereits in Stufe 2 oder geliefert sind → nicht in Stufe 1 zeigen
+  const bereitsBestelltKeys=new Set(
+    bestellungen
+      .filter(b=>b.status==='bestellt'||b.status==='geliefert')
+      .map(b=>b.key)
+      .filter(Boolean)
+  );
 
-  // Stufe 1: Offen — vom Schiff gemeldet, noch NICHT bestellt
+  // Stufe 1: Offen — vom Schiff gemeldet, noch NICHT in Stufe 2
   const offen=[];
   SCHIFFE_L.forEach(({id,name,icon})=>{
     if(!state[id])return;
