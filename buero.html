@@ -274,7 +274,64 @@ function save(){try{localStorage.setItem('szr_v6',JSON.stringify(state));localSt
 // Status: 'offen' = gemeldet vom Schiff, 'bestellt' = beim Lieferanten bestellt, 'geliefert' = erledigt
 let bestellungen=[];
 try{bestellungen=JSON.parse(localStorage.getItem('szr_best_v3')||'[]');}catch(e){}
-function saveBest(){try{localStorage.setItem('szr_best_v3',JSON.stringify(bestellungen));}catch(e){}}
+
+async function saveBest(){
+  // Lokal speichern als Fallback
+  try{localStorage.setItem('szr_best_v3',JSON.stringify(bestellungen));}catch(e){}
+}
+
+async function syncBestellungen(){
+  const items=await sbGet('bestellungen','order=datum.desc&limit=100');
+  if(!items)return;
+  bestellungen=items.map(it=>({
+    id:it.id,
+    key:it.key,
+    schiff:it.schiff,
+    schiffName:it.schiff_name,
+    icon:it.icon,
+    idx:it.idx,
+    artikel:it.artikel,
+    geb:it.geb||'',
+    kat:it.kat,
+    katLabel:it.kat_label,
+    menge:parseFloat(it.menge)||1,
+    lief:it.lief,
+    wb:it.wb||'',
+    status:it.status,
+    datum:it.datum,
+    geliefertDatum:it.geliefert_datum,
+    splits:it.splits||[],
+    zielSchiff:it.schiff,
+  }));
+  try{localStorage.setItem('szr_best_v3',JSON.stringify(bestellungen));}catch(e){}
+}
+
+async function pushBestelling(b){
+  try{
+    await fetch(`${SB}/rest/v1/bestellungen`,{
+      method:'POST',
+      headers:{...H,'Prefer':'resolution=merge-duplicates'},
+      body:JSON.stringify({
+        id:b.id,key:b.key,schiff:b.schiff,schiff_name:b.schiffName,
+        icon:b.icon,idx:b.idx||0,artikel:b.artikel,geb:b.geb||'',
+        kat:b.kat,kat_label:b.katLabel,menge:b.menge,lief:b.lief||'',
+        wb:b.wb||'',status:b.status,datum:b.datum,
+        geliefert_datum:b.geliefertDatum||null,
+        splits:b.splits||[]
+      })
+    });
+  }catch(e){}
+}
+
+async function updateBestellingStatus(id,status,extra={}){
+  try{
+    await fetch(`${SB}/rest/v1/bestellungen?id=eq.${encodeURIComponent(id)}`,{
+      method:'PATCH',
+      headers:{...H,'Prefer':'return=minimal'},
+      body:JSON.stringify({status,...extra})
+    });
+  }catch(e){}
+}
 
 let curPage='dashboard',sollKat='soft',sollSchiff='MS Rhystern';
 let modal=null;
@@ -304,6 +361,7 @@ async function doSync(){
   // Sync bestellungen status back to schiff app (bestellt=false when delivered)
   const li=await sbGet('transaktionen2','order=zeitpunkt.desc');
   if(li)log=li.map(t=>({zeit:t.zeitpunkt,typ:t.typ,von:t.von,nach:t.nach,artikel:t.artikel,menge:t.menge,einheit:t.einheit,kat:t.kat})).slice(0,200);
+  await syncBestellungen();
   save();
   if(pill)pill.className=items?'sync-pill sp-ok':'sync-pill sp-err';
   if(txt)txt.textContent=items?('Verbunden · '+fmtT(new Date().toISOString())):'Offline';
@@ -636,14 +694,16 @@ async function bestellenBeiLieferant(schiff,kat,idx){
   const b={
     id:Date.now()+'_'+Math.random().toString(36).slice(2),
     key:schiff+'_'+kat+'_'+idx,
-    idx:idx,
+    idx,
     schiff,schiffName:info.name,icon:info.icon,
     artikel:p.name,geb:p.geb||'',kat,katLabel:KATEGORIEN.find(k=>k.id===kat)?.label||'',
     menge,lief:p.lief,wb:p.wb||'',
     status:'bestellt',datum:now(),
     splits:[{schiff,menge}]
   };
-  bestellungen.unshift(b);saveBest();
+  bestellungen.unshift(b);
+  await saveBest();
+  await pushBestelling(b);
   renderPage();
 }
 
@@ -652,26 +712,23 @@ async function geliefert(bid){
   if(!b)return;
   b.status='geliefert';
   b.geliefertDatum=now();
-  saveBest();
+  await saveBest();
+  await updateBestellingStatus(bid,'geliefert',{geliefert_datum:b.geliefertDatum,splits:b.splits||[]});
 
   const splits=b.splits&&b.splits.length>0?b.splits:[{schiff:b.zielSchiff||b.schiff,menge:b.menge}];
   const idx=PRODUKTE[b.kat].findIndex(p=>p.name===b.artikel);
 
   for(const sp of splits){
     if(idx<0)continue;
-    // Atomar in Supabase erhöhen
     await rpc('adjust_bestand',{p_standort:sp.schiff,p_kat:b.kat,p_artikel_index:idx,p_delta:sp.menge});
-    // Log
     await fetch(`${SB}/rest/v1/transaktionen2`,{method:'POST',headers:H,
       body:JSON.stringify({zeitpunkt:now(),typ:'Lieferung',von:'Lieferant',nach:sp.schiff,artikel:b.artikel,menge:sp.menge,einheit:KATEGORIEN.find(k=>k.id===b.kat)?.einheit||'',kat:b.kat})});
   }
 
-  // Bestellt-Flag entfernen
   if(idx>=0){
     await rpc('set_bestand_meta',{p_standort:b.schiff,p_kat:b.kat,p_artikel_index:idx,p_bestellt:false,p_bestell_menge:0});
   }
 
-  // Lokalen State sofort aktualisieren
   splits.forEach(sp=>{
     if(state[sp.schiff]&&state[sp.schiff][b.kat]&&idx>=0){
       state[sp.schiff][b.kat][idx].bestand=Math.round((state[sp.schiff][b.kat][idx].bestand+sp.menge)*2)/2;
@@ -685,36 +742,47 @@ async function geliefert(bid){
   await doSync();
 }
 
-function zurueckZuOffen(bid){
+async function zurueckZuOffen(bid){
   const b=bestellungen.find(b=>b.id===bid);
-  if(b){b.status='offen_archiv';saveBest();renderPage();}
+  if(!b)return;
+  b.status='offen_archiv';
+  await saveBest();
+  await updateBestellingStatus(bid,'offen_archiv');
+  renderPage();
 }
 
 // Split Funktionen
-function addSplit(bid){
+async function addSplit(bid){
   const b=bestellungen.find(b=>b.id===bid);
   if(!b)return;
   if(!b.splits||b.splits.length===0)b.splits=[{schiff:b.schiff,menge:b.menge}];
   b.splits.push({schiff:SCHIFFE_L[0].id,menge:1});
-  saveBest();renderPage();
+  await saveBest();
+  await updateBestellingStatus(bid,b.status,{splits:b.splits});
+  renderPage();
 }
-function removeSplit(bid,si){
+async function removeSplit(bid,si){
   const b=bestellungen.find(b=>b.id===bid);
   if(!b||!b.splits||b.splits.length<=1)return;
   b.splits.splice(si,1);
-  saveBest();renderPage();
+  await saveBest();
+  await updateBestellingStatus(bid,b.status,{splits:b.splits});
+  renderPage();
 }
-function changeSplitSchiff(bid,si,val){
+async function changeSplitSchiff(bid,si,val){
   const b=bestellungen.find(b=>b.id===bid);
   if(!b||!b.splits||!b.splits[si])return;
   b.splits[si].schiff=val;
-  saveBest();
+  await saveBest();
+  await updateBestellingStatus(bid,b.status,{splits:b.splits});
 }
-function changeSplitMenge(bid,si,delta){
+async function changeSplitMenge(bid,si,delta){
   const b=bestellungen.find(b=>b.id===bid);
   if(!b||!b.splits||!b.splits[si])return;
-  b.splits[si].menge=Math.max(0.5,Math.round((b.splits[si].menge+delta)*2)/2); // Halbe erlaubt
-  saveBest();renderPage();
+  b.splits[si].menge=Math.max(0.5,Math.round((b.splits[si].menge+delta)*2)/2);
+  await saveBest();
+  await updateBestellingStatus(bid,b.status,{splits:b.splits});
+  renderPage();
 }
 
 // ════════════════════════════════════════
@@ -755,7 +823,7 @@ function renderModal(){
   }
 }
 
-function commitManuel(){
+async function commitManuel(){
   const p=PRODUKTE[manuelF.kat][manuelF.art];
   const info=SCHIFFE_L.find(s=>s.id===manuelF.schiff);
   const b={
@@ -769,7 +837,9 @@ function commitManuel(){
     status:'bestellt',datum:now(),
     splits:[{schiff:manuelF.schiff,menge:manuelF.menge}]
   };
-  bestellungen.unshift(b);saveBest();
+  bestellungen.unshift(b);
+  await saveBest();
+  await pushBestelling(b);
   closeModal();renderPage();
 }
 
