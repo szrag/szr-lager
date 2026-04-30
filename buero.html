@@ -30,14 +30,14 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 .hdr-row{display:flex;align-items:center;gap:10px}
 .hdr-title{font-size:19px;font-weight:700;flex:1}
 .hdr-date{font-size:12px;color:var(--text3);margin-top:2px}
-.sync-pill{display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap}
+.sync-pill{display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer}
 .sp-ok{background:var(--green-l);color:var(--green)}
 .sp-err{background:var(--red-l);color:var(--red)}
 .sp-off{background:var(--bg3);color:var(--text3)}
 .sync-dot{width:6px;height:6px;border-radius:50%;background:currentColor}
-.scroll{flex:1;overflow-y:auto;padding:12px 16px 100px}
+.scroll{overflow-y:auto;padding:12px 16px 100px}
 .scroll::-webkit-scrollbar{display:none}
-.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,0.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid var(--border);display:flex;padding:8px 0 20px;z-index:50}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,0.92);backdrop-filter:blur(20px);border-top:1px solid var(--border);display:flex;padding:8px 0 20px;z-index:50}
 .nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px 0;border:none;background:transparent;cursor:pointer;font-family:var(--font)}
 .nav-icon{font-size:22px;line-height:1;position:relative}
 .nav-label{font-size:10px;font-weight:500;color:var(--text4)}
@@ -61,6 +61,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 .t-ok{background:var(--green-l);color:var(--green)}
 .t-warn{background:var(--orange-l);color:var(--orange)}
 .t-bad{background:var(--red-l);color:var(--red)}
+.t-blue{background:var(--blue-l);color:var(--blue)}
 .schiff-row{display:flex;align-items:center;gap:10px;padding:13px 14px;border-bottom:1px solid var(--border);cursor:pointer}
 .schiff-row:last-child{border-bottom:none}
 .sr-icon{font-size:26px;flex-shrink:0}
@@ -68,14 +69,26 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 .sr-name{font-size:15px;font-weight:600}
 .sr-sub{font-size:12px;color:var(--text3);margin-top:2px}
 .status-dot{width:10px;height:10px;border-radius:50%}
-.bestell-item{display:flex;align-items:center;gap:10px;padding:13px 14px;border-bottom:1px solid var(--border)}
-.bestell-item:last-child{border-bottom:none}
-.bi-icon{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
-.bi-info{flex:1}
-.bi-name{font-size:14px;font-weight:600}
-.bi-detail{font-size:11px;color:var(--text3);margin-top:3px}
-.bi-schiff{font-size:11px;font-weight:600;color:var(--blue);margin-top:2px}
-.bi-btn{padding:6px 12px;border-radius:20px;border:none;cursor:pointer;font-size:12px;font-weight:600;font-family:var(--font);background:var(--green);color:#fff}
+/* BESTELLWORKFLOW */
+.workflow-item{display:flex;align-items:flex-start;gap:10px;padding:13px 14px;border-bottom:1px solid var(--border)}
+.workflow-item:last-child{border-bottom:none}
+.wf-icon{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.wf-info{flex:1}
+.wf-name{font-size:14px;font-weight:600}
+.wf-detail{font-size:11px;color:var(--text3);margin-top:3px}
+.wf-schiff{font-size:11px;font-weight:600;color:var(--blue);margin-top:2px}
+.wf-actions{display:flex;flex-direction:column;gap:5px;align-items:flex-end;flex-shrink:0}
+.wf-btn{padding:6px 12px;border-radius:20px;border:none;cursor:pointer;font-size:12px;font-weight:600;font-family:var(--font);white-space:nowrap}
+.wf-btn-blue{background:var(--blue);color:#fff}
+.wf-btn-green{background:var(--green);color:#fff}
+.wf-btn-gray{background:var(--bg3);color:var(--text3)}
+/* MENGE EDIT */
+.menge-edit{display:flex;align-items:center;gap:6px;margin-top:5px}
+.menge-edit-btn{width:24px;height:24px;border-radius:50%;border:none;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center}
+.me-m{background:var(--red-l);color:var(--red)}
+.me-p{background:var(--blue-l);color:var(--blue)}
+.menge-val{font-size:14px;font-weight:700;min-width:50px;text-align:center}
+/* SOLL TABLE */
 .seg{display:flex;background:var(--bg3);border-radius:10px;padding:2px;margin-bottom:12px}
 .seg-btn{flex:1;padding:6px 2px;border:none;background:transparent;border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;color:var(--text3);font-family:var(--font)}
 .seg-btn.active{background:#fff;color:var(--text);font-weight:700;box-shadow:var(--sh)}
@@ -106,7 +119,26 @@ tr:last-child td{border-bottom:none}
 .empty-icon{font-size:40px;margin-bottom:10px}
 .empty-title{font-size:16px;font-weight:600;color:var(--text2);margin-bottom:5px}
 .empty-sub{font-size:13px;color:var(--text3)}
-@media print{.hdr,.bottom-nav,.print-btn{display:none!important}.scroll{padding:0}}
+/* MODAL */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:200;display:flex;align-items:flex-end;justify-content:center}
+.sheet{background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:560px;max-height:92vh;overflow-y:auto;padding:8px 0 40px}
+.handle{width:36px;height:4px;background:var(--bg3);border-radius:2px;margin:8px auto 18px}
+.sh-title{font-size:18px;font-weight:700;padding:0 20px 3px}
+.sh-sub{font-size:13px;color:var(--text3);padding:0 20px 16px}
+.sh-sec{padding:0 20px 14px}
+.sh-label{font-size:12px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}
+.mp{display:flex;align-items:center;justify-content:center;gap:16px;padding:8px 0}
+.mp-btn{width:48px;height:48px;border-radius:50%;border:none;cursor:pointer;font-size:26px;font-weight:300;display:flex;align-items:center;justify-content:center}
+.mp-btn:active{transform:scale(0.9)}
+.mp-m{background:var(--red-l);color:var(--red)}
+.mp-p{background:var(--blue-l);color:var(--blue)}
+.mp-val{text-align:center;min-width:80px}
+.mp-num{font-size:34px;font-weight:700}
+.mp-unit{font-size:12px;color:var(--text3);margin-top:2px}
+.act-btn{width:calc(100% - 40px);margin:8px 20px 0;padding:15px;border-radius:var(--rs);border:none;cursor:pointer;font-size:16px;font-weight:700;font-family:var(--font)}
+.ab-blue{background:var(--blue);color:#fff}
+.ab-green{background:var(--green);color:#fff}
+@media print{.hdr,.bottom-nav,.print-btn,.overlay{display:none!important}.scroll{padding:0}}
 </style>
 </head>
 <body>
@@ -144,80 +176,82 @@ tr:last-child td{border-bottom:none}
   </button>
 </div>
 </div>
+<div id="modal-root"></div>
 
 <script>
 const SCHIFFE_L=[
-  {id:'Bootshaus',name:'Bootshaus',icon:'🏠',type:'Hauptlager'},
-  {id:'MS Rhystern',name:'MS Rhystern',icon:'🚢',type:'Grosses Schiff'},
-  {id:'MS Rhenus',name:'MS Rhenus',icon:'🚢',type:'Grosses Schiff'},
-  {id:'MS Hecht',name:'MS Hecht',icon:'🚤',type:'Schiff'},
+  {id:'Bootshaus',name:'Bootshaus',icon:'🏠'},
+  {id:'MS Rhystern',name:'MS Rhystern',icon:'🚢'},
+  {id:'MS Rhenus',name:'MS Rhenus',icon:'🚢'},
+  {id:'MS Hecht',name:'MS Hecht',icon:'🚤'},
 ];
 const KATEGORIEN=[
   {id:'soft',label:'Softgetränke',einheit:'Hr.',color:'var(--blue)'},
   {id:'wein',label:'Wein',einheit:'6er-Einh.',color:'var(--purple)'},
-  {id:'bier',label:'Bier',einheit:'20er-Krt.',color:'var(--brown)'},
+  {id:'bier',label:'Bier',einheit:'Krt.',color:'var(--brown)'},
   {id:'spirits',label:'Spirituosen',einheit:'Fl.',color:'var(--orange)'},
 ];
 const PRODUKTE={
   soft:[
-    {nr:'10301',name:'Rivella Rot',geb:'24x33cl',chf:25.91},
-    {nr:'10406',name:'Eptinger rot m. Kohlens.',geb:'12x1l',chf:12.75},
-    {nr:'10641',name:'Schweppes Indian Tonic',geb:'30x20cl',chf:28.30},
-    {nr:'10742',name:'Eptinger blau o. Kohlens.',geb:'12x1l',chf:12.75},
-    {nr:'14381',name:'Red Bull Original',geb:'24x25cl',chf:28.67},
-    {nr:'15273',name:'Eptinger blau 33cl',geb:'24x33cl',chf:21.62},
-    {nr:'39390',name:'Möhl Saft alkoholfrei',geb:'15x50cl',chf:22.69},
-    {nr:'52833',name:'Calanda Radler',geb:'24x33cl',chf:28.46},
-    {nr:'10309',name:'Elmer Citro',geb:'24x33cl',chf:21.06},
-    {nr:'39167',name:'Schweppes Ginger Ale',geb:'4x6x50cl',chf:30.95},
-    {nr:'42837',name:'Appenzeller Leermond',geb:'24x33cl',chf:44.40},
-    {nr:'56077',name:'Vivi Kola Zéro',geb:'24x33cl',chf:37.44},
-    {nr:'56078',name:'Vivi Kola Original',geb:'24x33cl',chf:37.44},
-    {nr:'67355',name:'Vivi Soda BIO Apfelschorle',geb:'24x33cl',chf:37.74},
-    {nr:'67356',name:'Vivi Soda BIO Zitrone Ingwer',geb:'24x33cl',chf:37.74},
-    {nr:'10306',name:'Eptinger rot 33cl',geb:'24x33cl',chf:21.62},
-    {nr:'62276',name:'Vivitz Bio Eistee',geb:'4x6x50cl',chf:48.20},
-    {nr:'68737',name:'Vivi BIO Mate Cascara',geb:'24x33cl',chf:37.74},
-    {nr:'10707',name:'Ramseier Orangensaft',geb:'12x1l',chf:28.04},
+    {nr:'10301',name:'Rivella Rot',geb:'24x33cl',chf:25.91,lief:'stardrinks'},
+    {nr:'10406',name:'Eptinger rot m. Kohlens.',geb:'12x1l',chf:12.75,lief:'stardrinks'},
+    {nr:'10641',name:'Schweppes Indian Tonic',geb:'30x20cl',chf:28.30,lief:'stardrinks'},
+    {nr:'10742',name:'Eptinger blau o. Kohlens.',geb:'12x1l',chf:12.75,lief:'stardrinks'},
+    {nr:'14381',name:'Red Bull Original',geb:'24x25cl',chf:28.67,lief:'stardrinks'},
+    {nr:'15273',name:'Eptinger blau 33cl',geb:'24x33cl',chf:21.62,lief:'stardrinks'},
+    {nr:'39390',name:'Möhl Saft',geb:'15x50cl',chf:22.69,lief:'stardrinks'},
+    {nr:'10309',name:'Elmer Citro',geb:'24x33cl',chf:21.06,lief:'stardrinks'},
+    {nr:'39167',name:'Schweppes Ginger Ale',geb:'4x6x50cl',chf:30.95,lief:'stardrinks'},
+    {nr:'56077',name:'Vivi Kola Zéro',geb:'24x33cl',chf:37.44,lief:'stardrinks'},
+    {nr:'56078',name:'Vivi Kola Original',geb:'24x33cl',chf:37.44,lief:'stardrinks'},
+    {nr:'67355',name:'Vivi Soda BIO Apfelschorle',geb:'24x33cl',chf:37.74,lief:'stardrinks'},
+    {nr:'67356',name:'Vivi Soda BIO Zitrone Ingwer',geb:'24x33cl',chf:37.74,lief:'stardrinks'},
+    {nr:'10306',name:'Eptinger rot 33cl',geb:'24x33cl',chf:21.62,lief:'stardrinks'},
+    {nr:'62276',name:'Vivitz Bio Eistee',geb:'4x6x50cl',chf:48.20,lief:'stardrinks'},
+    {nr:'68737',name:'Vivi BIO Mate Cascara',geb:'24x33cl',chf:37.74,lief:'stardrinks'},
+    {nr:'10707',name:'Ramseier Orangensaft',geb:'12x1l',chf:28.04,lief:'stardrinks'},
   ],
   wein:[
-    {kat:'Schaumwein',name:'Secco alkoholfrei (Kellerei Rahm)'},
-    {kat:'Schaumwein',name:'Prosecco Contessa Giulia IT'},
-    {kat:'Weisswein',name:'Teufener Surprise'},
-    {kat:'Weisswein',name:'Teufener Riesling x Sylvaner'},
-    {kat:'Weisswein',name:'Teufener Federweiss (Blanc de Noir)'},
-    {kat:'Weisswein',name:'Teufener Pinot Gris'},
-    {kat:'Weisswein',name:'Freiensteiner Riesling x Sylvaner Auslese'},
-    {kat:'Weisswein',name:'Eglisauer Riesling x Sylvaner'},
-    {kat:'Weisswein',name:'Eglisauer Räuschling'},
-    {kat:'Weisswein',name:'Rüdlinger Federweiss'},
-    {kat:'Weisswein',name:'Buchberger Riesling x Sylvaner'},
-    {kat:'Weisswein',name:'Chardonnay California'},
-    {kat:'Rosé',name:'Buchberger Rosé'},
-    {kat:'Rotwein',name:'Teufener Blauburgunder classique'},
-    {kat:'Rotwein',name:'Freiensteiner Pinot Schwarz 12'},
-    {kat:'Rotwein',name:'Eglisauer Pinot Noir Auslese'},
-    {kat:'Rotwein',name:'Eglisauer Pinot Noir Selection Stadtberg'},
-    {kat:'Rotwein',name:'Rüdlinger Pinot Noir aus alten Reben'},
-    {kat:'Rotwein',name:'Buchberger Blauburgunder 5dl'},
-    {kat:'Rotwein',name:'Buchberger Blauburgunder 7dl'},
-    {kat:'Rotwein',name:'Cabernet Sauvignon California'},
-    {kat:'Rotwein',name:'Salento IGT Primitivo – Conti Zecca'},
+    {kat:'Schaumwein',name:'Secco alkoholfrei (Kellerei Rahm)',vol:'7.5dl',lief:'stardrinks'},
+    {kat:'Schaumwein',name:'Prosecco Contessa Giulia IT',vol:'7.0dl',lief:'stardrinks'},
+    {kat:'Weisswein',name:'Teufener Surprise',vol:'5.0dl',lief:'weinbauer',wb:'Weingut Teufen'},
+    {kat:'Weisswein',name:'Teufener Riesling x Sylvaner',vol:'7.5dl',lief:'weinbauer',wb:'Weingut Teufen'},
+    {kat:'Weisswein',name:'Teufener Federweiss (Blanc de Noir)',vol:'7.5dl',lief:'weinbauer',wb:'Weingut Teufen'},
+    {kat:'Weisswein',name:'Teufener Pinot Gris',vol:'7.5dl',lief:'weinbauer',wb:'Weingut Teufen'},
+    {kat:'Weisswein',name:'Freiensteiner Riesling x Sylvaner Auslese',vol:'7.5dl',lief:'weinbauer',wb:'Freiensteiner'},
+    {kat:'Weisswein',name:'Eglisauer Riesling x Sylvaner',vol:'7.0dl',lief:'weinbauer',wb:'Eglisauer'},
+    {kat:'Weisswein',name:'Eglisauer Räuschling',vol:'7.5dl',lief:'weinbauer',wb:'Eglisauer'},
+    {kat:'Weisswein',name:'Rüdlinger Federweiss',vol:'5.0dl',lief:'weinbauer',wb:'Rüdlinger'},
+    {kat:'Weisswein',name:'Buchberger Riesling x Sylvaner',vol:'7.5dl',lief:'weinbauer',wb:'Buchberger'},
+    {kat:'Weisswein',name:'Chardonnay California',vol:'7.5dl',lief:'stardrinks'},
+    {kat:'Rosé',name:'Buchberger Rosé',vol:'5.0dl',lief:'weinbauer',wb:'Buchberger'},
+    {kat:'Rotwein',name:'Teufener Blauburgunder classique',vol:'7.5dl',lief:'weinbauer',wb:'Weingut Teufen'},
+    {kat:'Rotwein',name:'Freiensteiner Pinot Schwarz 12',vol:'7.5dl',lief:'weinbauer',wb:'Freiensteiner'},
+    {kat:'Rotwein',name:'Eglisauer Pinot Noir Auslese',vol:'7.5dl',lief:'weinbauer',wb:'Eglisauer'},
+    {kat:'Rotwein',name:'Eglisauer Pinot Noir Selection Stadtberg',vol:'7.5dl',lief:'weinbauer',wb:'Eglisauer'},
+    {kat:'Rotwein',name:'Rüdlinger Pinot Noir aus alten Reben',vol:'5.0dl',lief:'weinbauer',wb:'Rüdlinger'},
+    {kat:'Rotwein',name:'Buchberger Blauburgunder 5dl',vol:'5.0dl',lief:'weinbauer',wb:'Buchberger'},
+    {kat:'Rotwein',name:'Buchberger Blauburgunder 7dl',vol:'7.0dl',lief:'weinbauer',wb:'Buchberger'},
+    {kat:'Rotwein',name:'Cabernet Sauvignon California',vol:'7.5dl',lief:'stardrinks'},
+    {kat:'Rotwein',name:'Salento IGT Primitivo – Conti Zecca',vol:'7.5dl',lief:'stardrinks'},
   ],
   bier:[
-    {name:'ST. Laurentius Hell Lager',geb:'20x33cl'},
-    {name:'ST. Laurentius Liquid Sunshine',geb:'20x33cl'},
+    {name:'ST. Laurentius Hell Lager',geb:'20x33cl',lief:'st_laurentius'},
+    {name:'ST. Laurentius Liquid Sunshine',geb:'20x33cl',lief:'st_laurentius'},
+    {name:'Calanda Radler',geb:'24x33cl',chf:28.46,lief:'stardrinks'},
+    {name:'Appenzeller Leermond Alkoholfrei',geb:'24x33cl',chf:44.40,lief:'stardrinks'},
+    {name:'Möhl Saft vom Fass',geb:'12x50cl',lief:'stardrinks'},
   ],
   spirits:[
-    {name:'Aperol',geb:'1 Fl.'},
-    {name:'Martini',geb:'1 Fl.'},
-    {name:'Campari',geb:'1 Fl.'},
-    {name:'Kirschwasser',geb:'1 Fl.'},
-    {name:'Williamsbirne',geb:'1 Fl.'},
-    {name:'Baileys',geb:'1 Fl.'},
-    {name:'Gin',geb:'1 Fl.'},
-    {name:'Limoncello',geb:'1 Fl.'},
-    {name:'Grappa',geb:'1 Fl.'},
+    {name:'Aperol',geb:'1 Fl.',lief:'stardrinks'},
+    {name:'Martini',geb:'1 Fl.',lief:'stardrinks'},
+    {name:'Campari',geb:'1 Fl.',lief:'stardrinks'},
+    {name:'Kirschwasser',geb:'1 Fl.',lief:'stardrinks'},
+    {name:'Williamsbirne',geb:'1 Fl.',lief:'stardrinks'},
+    {name:'Baileys',geb:'1 Fl.',lief:'stardrinks'},
+    {name:'Gin',geb:'1 Fl.',lief:'stardrinks'},
+    {name:'Limoncello',geb:'1 Fl.',lief:'stardrinks'},
+    {name:'Grappa',geb:'1 Fl.',lief:'stardrinks'},
   ],
 };
 
@@ -226,18 +260,26 @@ const SB='https://ezgkryebktbamxyhemkv.supabase.co';
 const KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV6Z2tyeWVia3RiYW14eWhlbWt2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc0ODY4ODksImV4cCI6MjA5MzA2Mjg4OX0.CZ0E_aCoCscgn4giXMgKoGhnKdgivrK9fgURbM0EKM0';
 const H={'Content-Type':'application/json','apikey':KEY,'Authorization':'Bearer '+KEY};
 async function sbGet(t,q=''){try{const r=await fetch(`${SB}/rest/v1/${t}?${q}&limit=2000`,{headers:{...H,'Accept':'application/json'}});return r.ok?await r.json():null;}catch(e){return null;}}
-async function rpc(fn,params){try{await fetch(`${SB}/rest/v1/rpc/${fn}`,{method:'POST',headers:H,body:JSON.stringify(params)});}catch(e){}}
+async function sbInsert(t,d){try{await fetch(`${SB}/rest/v1/${t}`,{method:'POST',headers:H,body:JSON.stringify(d)});}catch(e){}}
+async function rpc(fn,p){try{await fetch(`${SB}/rest/v1/rpc/${fn}`,{method:'POST',headers:H,body:JSON.stringify(p)});}catch(e){}}
 
 // STATE
-function initState(){const s={};SCHIFFE_L.forEach(({id})=>{s[id]={};KATEGORIEN.forEach(k=>{s[id][k.id]=PRODUKTE[k.id].map(()=>({bestand:0,soll:0,bestellt:0}));});});return s;}
+function initState(){const s={};SCHIFFE_L.forEach(({id})=>{s[id]={};KATEGORIEN.forEach(k=>{s[id][k.id]=PRODUKTE[k.id].map(()=>({bestand:0,soll:0,bestellt:0,bestellMenge:0}));});});return s;}
 let state,log=[];
-try{state=JSON.parse(localStorage.getItem('szr_v5')||'null')||initState();}catch(e){state=initState();}
-try{log=JSON.parse(localStorage.getItem('szr_log_v5')||'[]');}catch(e){}
-function save(){try{localStorage.setItem('szr_v5',JSON.stringify(state));localStorage.setItem('szr_log_v5',JSON.stringify(log.slice(0,300)));}catch(e){}}
+try{state=JSON.parse(localStorage.getItem('szr_v6')||'null')||initState();}catch(e){state=initState();}
+try{log=JSON.parse(localStorage.getItem('szr_log_v6')||'[]');}catch(e){}
+function save(){try{localStorage.setItem('szr_v6',JSON.stringify(state));localStorage.setItem('szr_log_v6',JSON.stringify(log.slice(0,300)));}catch(e){}}
+
+// Bestellungen (lokal, persistent)
+// Status: 'offen' = gemeldet vom Schiff, 'bestellt' = beim Lieferanten bestellt, 'geliefert' = erledigt
+let bestellungen=[];
+try{bestellungen=JSON.parse(localStorage.getItem('szr_best_v3')||'[]');}catch(e){}
+function saveBest(){try{localStorage.setItem('szr_best_v3',JSON.stringify(bestellungen));}catch(e){}}
 
 let curPage='dashboard',sollKat='soft',sollSchiff='MS Rhystern';
+let modal=null,modalData={};
 
-// SYNC — always trust DB
+// SYNC
 let isSyncing=false;
 async function doSync(){
   if(isSyncing)return;
@@ -249,14 +291,16 @@ async function doSync(){
   const items=await sbGet('lagerbestand2');
   if(items){
     items.forEach(it=>{
-      const{standort,kat,artikel_index:idx,bestand,soll,bestellt}=it;
+      const{standort,kat,artikel_index:idx,bestand,soll,bestellt,bestell_menge}=it;
       if(state[standort]&&state[standort][kat]&&state[standort][kat][idx]!==undefined){
         state[standort][kat][idx].bestand=parseFloat(bestand)||0;
         state[standort][kat][idx].soll=parseFloat(soll)||0;
-        state[standort][kat][idx].bestellt=bestellt?1:0;
+        state[standort][kat][idx].bestellt=bestellt===true||bestellt===1?1:0;
+        state[standort][kat][idx].bestellMenge=parseFloat(bestell_menge)||0;
       }
     });
   }
+  // Sync bestellungen status back to schiff app (bestellt=false when delivered)
   const li=await sbGet('transaktionen2','order=zeitpunkt.desc');
   if(li)log=li.map(t=>({zeit:t.zeitpunkt,typ:t.typ,von:t.von,nach:t.nach,artikel:t.artikel,menge:t.menge,einheit:t.einheit,kat:t.kat})).slice(0,200);
   save();
@@ -270,14 +314,21 @@ async function doSync(){
 function now(){return new Date().toISOString();}
 function fmtH(v,kat){const u=KATEGORIEN.find(k=>k.id===kat)?.einheit||'';if(v===0)return'0 '+u;if(v%1===0)return v+' '+u;return'½ '+u;}
 function fmtT(iso){if(!iso)return'–';try{const d=new Date(iso);return d.toLocaleDateString('de-CH',{day:'2-digit',month:'2-digit'})+' '+d.toLocaleTimeString('de-CH',{hour:'2-digit',minute:'2-digit'});}catch(e){return'';}}
+function fmtDate(iso){if(!iso)return'–';try{return new Date(iso).toLocaleDateString('de-CH',{day:'numeric',month:'long'});}catch(e){return'';}}
 function getStatus(b,s){if(b<=0)return'bad';if(s>0&&b<s)return'warn';return'ok';}
 function statusCol(s){return s==='bad'?'var(--red)':s==='warn'?'var(--orange)':'var(--green)';}
 function schiffStatus(id){if(!state[id])return'ok';let w='ok';KATEGORIEN.forEach(k=>{state[id][k.id].forEach(r=>{const s=getStatus(r.bestand,r.soll);if(s==='bad')w='bad';else if(s==='warn'&&w!=='bad')w='warn';});});return w;}
-function totalPending(){let n=0;SCHIFFE_L.forEach(({id})=>{if(state[id])KATEGORIEN.forEach(k=>{state[id][k.id].forEach(r=>{if(r.bestellt)n++;});});});return n;}
+function totalOffen(){let n=0;SCHIFFE_L.forEach(({id})=>{if(state[id])KATEGORIEN.forEach(k=>{state[id][k.id].forEach(r=>{if(r.bestellt)n++;});});});return n;}
+function totalBestellt(){return bestellungen.filter(b=>b.status==='bestellt').length;}
+function getLiefName(lief){return lief==='stardrinks'?'Stardrinks':lief==='st_laurentius'?'ST. Laurentius':lief==='weinbauer'?'Weinbauer':'–';}
 
 // NAV
 function setPage(p,btn){curPage=p;document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderPage();}
-function updateBadge(){const n=totalPending();const b=document.getElementById('bestell-badge');if(b){if(n>0){b.style.display='flex';b.textContent=n;}else b.style.display='none';}}
+function updateBadge(){
+  const n=totalOffen()+totalBestellt();
+  const b=document.getElementById('bestell-badge');
+  if(b){if(n>0){b.style.display='flex';b.textContent=n;}else b.style.display='none';}
+}
 function renderPage(){
   const s=document.getElementById('main-scroll');
   if(curPage==='dashboard')s.innerHTML=renderDashboard();
@@ -290,13 +341,13 @@ function renderPage(){
 
 // DASHBOARD
 function renderDashboard(){
-  let pending=totalPending(),empty=0,low=0,totalChf=0;
+  let empty=0,low=0,totalChf=0;
   const warnings=[];
   SCHIFFE_L.forEach(({id,name,icon})=>{
     if(!state[id])return;
     KATEGORIEN.forEach(k=>{
       state[id][k.id].forEach((r,i)=>{
-        if(k.id==='soft')totalChf+=r.bestand*(PRODUKTE.soft[i].chf||0);
+        if(k.id==='soft'&&PRODUKTE.soft[i].chf)totalChf+=r.bestand*(PRODUKTE.soft[i].chf||0);
         const st=getStatus(r.bestand,r.soll);
         if(st==='bad')empty++;
         else if(st==='warn')low++;
@@ -304,7 +355,6 @@ function renderDashboard(){
       });
     });
   });
-
   const warnHTML=warnings.length===0
     ?`<div class="empty" style="padding:20px"><div class="empty-icon">✅</div><div class="empty-title">Alles OK!</div></div>`
     :warnings.slice(0,20).map(w=>`<div class="alert-row ${w.st==='bad'?'ar-red':'ar-orange'}">
@@ -318,12 +368,12 @@ function renderDashboard(){
 
   return`
     <div class="stat-grid">
-      <div class="stat"><div class="stat-icon">📦</div><div class="stat-label">Bestellungen</div><div class="stat-val" style="color:var(--blue)">${pending}</div></div>
+      <div class="stat"><div class="stat-icon">📋</div><div class="stat-label">Offen (Schiff)</div><div class="stat-val" style="color:var(--orange)">${totalOffen()}</div></div>
+      <div class="stat"><div class="stat-icon">🚚</div><div class="stat-label">Bestellt (Lief.)</div><div class="stat-val" style="color:var(--blue)">${totalBestellt()}</div></div>
       <div class="stat"><div class="stat-icon">⚠️</div><div class="stat-label">Warnungen</div><div class="stat-val" style="color:${empty>0?'var(--red)':'var(--orange)'}">${empty+low}</div></div>
       <div class="stat"><div class="stat-icon">💰</div><div class="stat-label">Soft-Lager (EK)</div><div class="stat-val" style="color:var(--purple);font-size:18px">CHF ${totalChf.toFixed(0)}</div></div>
-      <div class="stat"><div class="stat-icon">🍺</div><div class="stat-label">Kategorien</div><div class="stat-val" style="font-size:18px">4</div></div>
     </div>
-    <div class="stitle">Schiffe im Überblick</div>
+    <div class="stitle">Schiffe</div>
     <div class="card">${SCHIFFE_L.map(s=>{
       const st=schiffStatus(s.id);
       const al=KATEGORIEN.reduce((n,k)=>n+(state[s.id]?state[s.id][k.id].filter(r=>getStatus(r.bestand,r.soll)!=='ok').length:0),0);
@@ -332,7 +382,7 @@ function renderDashboard(){
         <div class="sr-icon">${s.icon}</div>
         <div class="sr-info">
           <div class="sr-name">${s.name}</div>
-          <div class="sr-sub">${al>0?`${al} Alarm${al>1?'e':''}`:'Kein Alarm'}${pend>0?` · ${pend} Bestellung${pend>1?'en':''} offen`:''}</div>
+          <div class="sr-sub">${al>0?`${al} Alarm${al>1?'e':''} ·`:''} ${pend>0?`${pend} offen`:''} ${!al&&!pend?'Alles OK':''}</div>
         </div>
         <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
           <div class="status-dot" style="background:${statusCol(st)}"></div>
@@ -344,38 +394,115 @@ function renderDashboard(){
     ${warnHTML}`;
 }
 
-// BESTELLUNGEN
+// BESTELLUNGEN — 3-Stufen-Workflow
 function renderBestell(){
-  const items=[];
+  // Stufe 1: Offen — vom Schiff gemeldet
+  const offen=[];
   SCHIFFE_L.forEach(({id,name,icon})=>{
     if(!state[id])return;
     KATEGORIEN.forEach(k=>{
       state[id][k.id].forEach((r,i)=>{
-        if(r.bestellt)items.push({schiff:id,schiffName:name,icon,artikel:PRODUKTE[k.id][i].name,kat:k.id,katLabel:k.label,idx:i,r,st:getStatus(r.bestand,r.soll)});
+        if(r.bestellt){
+          const p=PRODUKTE[k.id][i];
+          offen.push({schiff:id,schiffName:name,icon,artikel:p.name,geb:p.geb||'',kat:k.id,katLabel:k.label,idx:i,r,lief:p.lief,wb:p.wb});
+        }
       });
     });
   });
-  if(!items.length)return`<div class="empty"><div class="empty-icon">✅</div><div class="empty-title">Keine Bestellungen</div><div class="empty-sub">Sobald ein Schiff bestellt, erscheint es hier.</div></div>`;
-  const bySchiff={};
-  items.forEach(it=>{if(!bySchiff[it.schiff])bySchiff[it.schiff]=[];bySchiff[it.schiff].push(it);});
+
+  // Stufe 2: Beim Lieferanten bestellt
+  const bestellt=bestellungen.filter(b=>b.status==='bestellt');
+
+  // Stufe 3: Geliefert (letzte 10)
+  const geliefert=bestellungen.filter(b=>b.status==='geliefert').slice(0,10);
+
   let html='';
-  Object.entries(bySchiff).forEach(([id,rows])=>{
-    const info=SCHIFFE_L.find(s=>s.id===id);
-    html+=`<div class="stitle">${info.icon} ${info.name}</div><div class="card">`;
-    rows.forEach(it=>{
-      html+=`<div class="bestell-item">
-        <div class="bi-icon" style="background:${it.st==='bad'?'var(--red-l)':'var(--orange-l)'}">${it.st==='bad'?'🔴':'🟠'}</div>
-        <div class="bi-info">
-          <div class="bi-name">${it.artikel}</div>
-          <div class="bi-detail">${it.katLabel} · Ist: ${fmtH(it.r.bestand,it.kat)} · Soll: ${fmtH(it.r.soll,it.kat)}</div>
-          <div class="bi-schiff">${info.icon} ${info.name}</div>
+
+  // === STUFE 1: OFFEN ===
+  html+=`<div class="stitle">📋 Stufe 1 — Vom Schiff gemeldet (${offen.length})</div>`;
+  if(!offen.length){
+    html+=`<div class="card"><div class="empty" style="padding:20px"><div class="empty-sub">Keine offenen Meldungen</div></div></div>`;
+  } else {
+    html+=`<div class="card">`;
+    offen.forEach(it=>{
+      const bestellMenge=it.r.bestellMenge||1;
+      html+=`<div class="workflow-item">
+        <div class="wf-icon" style="background:var(--orange-l)">📋</div>
+        <div class="wf-info">
+          <div class="wf-name">${it.artikel}</div>
+          <div class="wf-detail">${it.katLabel} · ${it.geb} · Lieferant: ${getLiefName(it.lief)}${it.wb?' ('+it.wb+')':''}</div>
+          <div class="wf-schiff">${it.icon} ${it.schiffName}</div>
+          <div style="display:flex;align-items:center;gap:8px;margin-top:6px">
+            <span style="font-size:12px;color:var(--text3)">Menge:</span>
+            <button class="me-m menge-edit-btn" onclick="changeMenge('${it.schiff}','${it.kat}',${it.idx},-0.5)">−</button>
+            <span class="menge-val">${fmtH(bestellMenge,it.kat)}</span>
+            <button class="me-p menge-edit-btn" onclick="changeMenge('${it.schiff}','${it.kat}',${it.idx},0.5)">+</button>
+          </div>
         </div>
-        <button class="bi-btn" onclick="confirmOrder('${it.schiff}','${it.kat}',${it.idx})">Bestellt ✓</button>
+        <div class="wf-actions">
+          <button class="wf-btn wf-btn-blue" onclick="bestellenBeiLieferant('${it.schiff}','${it.kat}',${it.idx})">Bestellen →</button>
+        </div>
       </div>`;
     });
     html+='</div>';
-  });
-  html+=`<button class="print-btn" onclick="printBestell()">🖨 Bestellliste drucken</button>`;
+    html+=`<div style="display:flex;gap:8px;margin-bottom:4px">
+      <button class="print-btn" style="flex:1" onclick="printListeGesamt()">🖨 Gesamtliste (Stardrinks)</button>
+      <button class="print-btn" style="flex:1" onclick="printListeProSchiff()">🖨 Pro Schiff</button>
+    </div>`;
+  }
+
+  // === STUFE 2: BESTELLT ===
+  html+=`<div class="stitle" style="margin-top:20px">🚚 Stufe 2 — Beim Lieferanten bestellt (${bestellt.length})</div>`;
+  if(!bestellt.length){
+    html+=`<div class="card"><div class="empty" style="padding:20px"><div class="empty-sub">Noch nichts bestellt</div></div></div>`;
+  } else {
+    html+=`<div class="card">`;
+    bestellt.forEach(b=>{
+      html+=`<div class="workflow-item">
+        <div class="wf-icon" style="background:var(--blue-l)">🚚</div>
+        <div class="wf-info">
+          <div class="wf-name">${b.artikel}</div>
+          <div class="wf-detail">${b.katLabel} · ${getLiefName(b.lief)} · Bestellt: ${fmtDate(b.datum)}</div>
+          <div class="wf-schiff">${b.icon} ${b.schiffName}</div>
+          <div style="display:flex;align-items:center;gap:8px;margin-top:6px">
+            <span style="font-size:12px;color:var(--text3)">Menge:</span>
+            <button class="me-m menge-edit-btn" onclick="changeBestellMenge('${b.id}',-0.5)">−</button>
+            <span class="menge-val" id="bm_${b.id}">${fmtH(b.menge,b.kat)}</span>
+            <button class="me-p menge-edit-btn" onclick="changeBestellMenge('${b.id}',0.5)">+</button>
+          </div>
+          <div style="margin-top:6px">
+            <span style="font-size:11px;color:var(--text3)">Zielschiff: </span>
+            <select style="font-size:12px;padding:2px 6px;border:1px solid var(--border);border-radius:6px" onchange="changeZielSchiff('${b.id}',this.value)">
+              ${SCHIFFE_L.map(s=>`<option value="${s.id}" ${b.zielSchiff===s.id?'selected':''}>${s.icon} ${s.name}</option>`).join('')}
+            </select>
+          </div>
+        </div>
+        <div class="wf-actions">
+          <button class="wf-btn wf-btn-green" onclick="geliefert('${b.id}')">Geliefert ✓</button>
+          <button class="wf-btn wf-btn-gray" onclick="zurueckZuOffen('${b.id}')">Zurück</button>
+        </div>
+      </div>`;
+    });
+    html+='</div>';
+    html+=`<button class="print-btn" onclick="printLieferschein()">🖨 Lieferschein drucken (Pro Schiff)</button>`;
+  }
+
+  // === STUFE 3: GELIEFERT ===
+  if(geliefert.length){
+    html+=`<div class="stitle" style="margin-top:20px">✅ Letzte Lieferungen</div><div class="card">`;
+    geliefert.forEach(b=>{
+      html+=`<div class="workflow-item">
+        <div class="wf-icon" style="background:var(--green-l)">✅</div>
+        <div class="wf-info">
+          <div class="wf-name">${b.artikel}</div>
+          <div class="wf-detail">${b.katLabel} · ${fmtH(b.menge,b.kat)} geliefert · ${fmtDate(b.geliefertDatum)}</div>
+          <div class="wf-schiff">${b.icon} ${b.zielSchiff||b.schiffName}</div>
+        </div>
+      </div>`;
+    });
+    html+='</div>';
+  }
+
   return html;
 }
 
@@ -404,58 +531,38 @@ function renderSoll(){
     <div class="card"><div class="tbl-wrap"><table>
       <thead><tr><th>Artikel</th><th style="text-align:center">Ist</th><th style="text-align:center">Soll ✏️</th><th style="text-align:center">Diff</th><th style="text-align:center">Status</th></tr></thead>
       <tbody>${rows}</tbody>
-    </table></div></div>
-    <div style="font-size:11px;color:var(--text3);text-align:center;margin-top:6px">Soll-Wert eingeben → wird sofort gespeichert</div>`;
+    </table></div></div>`;
 }
 
 // STATISTIK
 function renderStatistik(){
-  const verbrauch={};
-  SCHIFFE_L.forEach(({id})=>{verbrauch[id]=0;});
+  const verbrauch={};SCHIFFE_L.forEach(({id})=>{verbrauch[id]=0;});
   log.filter(e=>e.typ==='Verbrauch').forEach(e=>{if(verbrauch[e.von]!==undefined)verbrauch[e.von]+=e.menge;});
   const maxV=Math.max(...Object.values(verbrauch),1);
-  const kosten={};
-  SCHIFFE_L.forEach(({id})=>{let k=0;if(state[id])state[id].soft.forEach((r,i)=>{k+=r.bestand*(PRODUKTE.soft[i].chf||0);});kosten[id]=k;});
+  const kosten={};SCHIFFE_L.forEach(({id})=>{let k=0;if(state[id])state[id].soft.forEach((r,i)=>{k+=r.bestand*(PRODUKTE.soft[i].chf||0);});kosten[id]=k;});
   const maxK=Math.max(...Object.values(kosten),1);
   const d30=new Date();d30.setDate(d30.getDate()-30);
   const recent=log.filter(e=>new Date(e.zeit)>=d30);
   const byTyp={Zubuchung:0,Verbrauch:0,Bezug:0};
   recent.forEach(e=>{if(byTyp[e.typ]!==undefined)byTyp[e.typ]++;});
-  // By category
-  const byKat={};
-  KATEGORIEN.forEach(k=>{byKat[k.id]=0;});
-  log.filter(e=>e.typ==='Verbrauch').forEach(e=>{if(e.kat&&byKat[e.kat]!==undefined)byKat[e.kat]+=e.menge;});
-
   return`
     <div class="stitle">Lagerbestand-Wert Soft (EK)</div>
     <div class="card" style="padding:14px">
-      ${SCHIFFE_L.map(s=>`<div class="kb-row">
-        <div class="kb-label">${s.icon} ${s.name.replace('Bootshaus','BH')}</div>
+      ${SCHIFFE_L.map(s=>`<div class="kb-row"><div class="kb-label">${s.icon} ${s.name.replace('Bootshaus','BH')}</div>
         <div class="kb-track"><div class="kb-fill" style="width:${Math.round(kosten[s.id]/maxK*100)}%"></div></div>
-        <div class="kb-val">CHF ${(kosten[s.id]||0).toFixed(0)}</div>
-      </div>`).join('')}
+        <div class="kb-val">CHF ${(kosten[s.id]||0).toFixed(0)}</div></div>`).join('')}
     </div>
     <div class="stitle">Verbrauch gesamt</div>
     <div class="card" style="padding:14px">
-      ${SCHIFFE_L.map(s=>`<div class="kb-row">
-        <div class="kb-label">${s.icon} ${s.name.replace('Bootshaus','BH')}</div>
+      ${SCHIFFE_L.map(s=>`<div class="kb-row"><div class="kb-label">${s.icon} ${s.name.replace('Bootshaus','BH')}</div>
         <div class="kb-track"><div class="kb-fill" style="width:${Math.round((verbrauch[s.id]||0)/maxV*100)}%;background:var(--orange)"></div></div>
-        <div class="kb-val">${(verbrauch[s.id]||0)} Einh.</div>
-      </div>`).join('')}
-    </div>
-    <div class="stitle">Verbrauch nach Kategorie</div>
-    <div class="card" style="padding:14px">
-      ${KATEGORIEN.map(k=>`<div class="kb-row">
-        <div class="kb-label">${k.label}</div>
-        <div class="kb-track"><div class="kb-fill" style="width:${Math.round((byKat[k.id]||0)/Math.max(...Object.values(byKat),1)*100)}%;background:${k.color}"></div></div>
-        <div class="kb-val">${(byKat[k.id]||0)} Einh.</div>
-      </div>`).join('')}
+        <div class="kb-val">${(verbrauch[s.id]||0)} Einh.</div></div>`).join('')}
     </div>
     <div class="stat-grid">
-      <div class="stat"><div class="stat-icon">↑</div><div class="stat-label">Zubuchungen</div><div class="stat-val" style="color:var(--blue)">${byTyp.Zubuchung}</div></div>
-      <div class="stat"><div class="stat-icon">↓</div><div class="stat-label">Verbrauch</div><div class="stat-val" style="color:var(--red)">${byTyp.Verbrauch}</div></div>
-      <div class="stat"><div class="stat-icon">⇄</div><div class="stat-label">Bezüge</div><div class="stat-val" style="color:var(--green)">${byTyp.Bezug}</div></div>
-      <div class="stat"><div class="stat-icon">📋</div><div class="stat-label">Total (30 Tage)</div><div class="stat-val">${recent.length}</div></div>
+      <div class="stat"><div class="stat-icon">↑</div><div class="stat-label">Zubuchungen (30T)</div><div class="stat-val" style="color:var(--blue)">${byTyp.Zubuchung}</div></div>
+      <div class="stat"><div class="stat-icon">↓</div><div class="stat-label">Verbrauch (30T)</div><div class="stat-val" style="color:var(--red)">${byTyp.Verbrauch}</div></div>
+      <div class="stat"><div class="stat-icon">✅</div><div class="stat-label">Geliefert</div><div class="stat-val" style="color:var(--green)">${bestellungen.filter(b=>b.status==='geliefert').length}</div></div>
+      <div class="stat"><div class="stat-icon">📋</div><div class="stat-label">Total (30T)</div><div class="stat-val">${recent.length}</div></div>
     </div>`;
 }
 
@@ -465,10 +572,10 @@ function renderLog(){
   return`<div class="card">${log.slice(0,80).map(e=>{
     const col=e.typ==='Zubuchung'?'var(--blue)':e.typ==='Verbrauch'?'var(--red)':'var(--green)';
     return`<div class="log-item">
-      <div class="log-dot" style="background:${col};margin-top:3px;flex-shrink:0"></div>
+      <div class="log-dot" style="background:${col}"></div>
       <div class="log-body">
         <div class="log-title">${e.typ==='Zubuchung'?'↑':'↓'} ${e.typ} · ${e.menge} ${e.einheit||''}</div>
-        <div class="log-sub">${e.artikel}${e.kat?` · ${KATEGORIEN.find(k=>k.id===e.kat)?.label||e.kat}`:''}</div>
+        <div class="log-sub">${e.artikel}${e.kat?` · ${KATEGORIEN.find(k=>k.id===e.kat)?.label||''}`:''}</div>
         <div class="log-sub">${e.von||'–'} → ${e.nach||'–'}</div>
         <div class="log-time">${fmtT(e.zeit)}</div>
       </div>
@@ -485,27 +592,157 @@ async function setSoll(schiff,kat,idx,val){
   await doSync();
 }
 
-async function confirmOrder(schiff,kat,idx){
-  state[schiff][kat][idx].bestellt=0;
+async function changeMenge(schiff,kat,idx,delta){
+  const r=state[schiff][kat][idx];
+  const newMenge=Math.max(0.5,Math.round((r.bestellMenge+delta)*2)/2);
+  state[schiff][kat][idx].bestellMenge=newMenge;
   save();renderPage();
-  await rpc('set_bestand_meta',{p_standort:schiff,p_kat:kat,p_artikel_index:idx,p_bestellt:false});
+  await rpc('set_bestand_meta',{p_standort:schiff,p_kat:kat,p_artikel_index:idx,p_bestellt:true,p_bestell_menge:newMenge});
+}
+
+function changeBestellMenge(id,delta){
+  const b=bestellungen.find(b=>b.id===id);
+  if(!b)return;
+  b.menge=Math.max(0.5,Math.round((b.menge+delta)*2)/2);
+  saveBest();renderPage();
+}
+
+function changeZielSchiff(id,val){
+  const b=bestellungen.find(b=>b.id===id);
+  if(b){b.zielSchiff=val;saveBest();}
+}
+
+async function bestellenBeiLieferant(schiff,kat,idx){
+  const r=state[schiff][kat][idx];
+  const p=PRODUKTE[kat][idx];
+  const info=SCHIFFE_L.find(s=>s.id===schiff);
+  const b={
+    id:Date.now()+'_'+Math.random().toString(36).slice(2),
+    schiff,schiffName:info.name,icon:info.icon,
+    artikel:p.name,geb:p.geb||'',kat,katLabel:KATEGORIEN.find(k=>k.id===kat)?.label||'',
+    menge:r.bestellMenge||1,lief:p.lief,wb:p.wb||'',
+    status:'bestellt',datum:now(),zielSchiff:schiff
+  };
+  bestellungen.unshift(b);saveBest();
+  // Schiff-Meldung bleibt (bestellt=true) bis geliefert
+  renderPage();
+}
+
+async function geliefert(bid){
+  const b=bestellungen.find(b=>b.id===bid);
+  if(!b)return;
+  b.status='geliefert';
+  b.geliefertDatum=now();
+  saveBest();
+  // Bestand erhöhen auf Zielschiff
+  const ziel=b.zielSchiff||b.schiff;
+  const idx=PRODUKTE[b.kat].findIndex(p=>p.name===b.artikel);
+  if(idx>=0&&state[ziel]){
+    state[ziel][b.kat][idx].bestand=Math.round((state[ziel][b.kat][idx].bestand+b.menge)*2)/2;
+    state[ziel][b.kat][idx].bestellt=0;
+    state[ziel][b.kat][idx].bestellMenge=0;
+    save();
+    await rpc('adjust_bestand',{p_standort:ziel,p_kat:b.kat,p_artikel_index:idx,p_delta:b.menge});
+    await rpc('set_bestand_meta',{p_standort:b.schiff,p_kat:b.kat,p_artikel_index:idx,p_bestellt:false,p_bestell_menge:0});
+  }
+  // Log
+  await fetch(`${SB}/rest/v1/transaktionen2`,{method:'POST',headers:H,body:JSON.stringify({zeitpunkt:now(),typ:'Lieferung',von:'Lieferant',nach:ziel,artikel:b.artikel,menge:b.menge,einheit:KATEGORIEN.find(k=>k.id===b.kat)?.einheit||'',kat:b.kat})});
   await doSync();
 }
 
-function printBestell(){
-  const items=[];
-  SCHIFFE_L.forEach(({id,name})=>{
+function zurueckZuOffen(bid){
+  const b=bestellungen.find(b=>b.id===bid);
+  if(b){b.status='offen_archiv';saveBest();renderPage();}
+}
+
+// PRINT LISTS
+function printListeGesamt(){
+  const offen=[];
+  SCHIFFE_L.forEach(({id,name,icon})=>{
     if(!state[id])return;
-    KATEGORIEN.forEach(k=>{state[id][k.id].forEach((r,i)=>{if(r.bestellt)items.push({schiff:name,artikel:PRODUKTE[k.id][i].name,katLabel:k.label,kat:k.id,r});});});
+    KATEGORIEN.forEach(k=>{
+      state[id][k.id].forEach((r,i)=>{
+        if(r.bestellt){
+          const p=PRODUKTE[k.id][i];
+          offen.push({schiff:name,icon,artikel:p.name,geb:p.geb||'',kat:k.id,katLabel:k.label,menge:r.bestellMenge||1,lief:p.lief,nr:p.nr||''});
+        }
+      });
+    });
+  });
+  // Zusammenfassen nach Artikel + Lieferant (Gesamtmenge)
+  const gesamt={};
+  offen.forEach(it=>{
+    const key=it.kat+'_'+it.artikel;
+    if(!gesamt[key])gesamt[key]={...it,mengeGesamt:0,schiffe:[]};
+    gesamt[key].mengeGesamt+=it.menge;
+    gesamt[key].schiffe.push(it.icon+' '+it.schiff+': '+fmtH(it.menge,it.kat));
+  });
+  const rows=Object.values(gesamt).sort((a,b)=>a.lief.localeCompare(b.lief));
+  const liefName={'stardrinks':'Stardrinks','st_laurentius':'ST. Laurentius','weinbauer':'Weinbauer'};
+  const w=window.open('','_blank');
+  w.document.write(`<html><head><title>Bestellliste Gesamt ${new Date().toLocaleDateString('de-CH')}</title>
+  <style>body{font-family:sans-serif;font-size:13px;padding:20px}h2,h3{margin-bottom:6px}p{color:#666;margin-bottom:12px}table{width:100%;border-collapse:collapse;margin-bottom:20px}th,td{border:1px solid #ddd;padding:7px 10px}th{background:#f5f5f5;font-weight:600}.lief-header{background:#e8f3ff;font-weight:700;padding:6px 10px;margin:16px 0 4px;border-radius:4px}</style></head>
+  <body><h2>Gesamtbestellliste — Stardrinks</h2><p>${new Date().toLocaleDateString('de-CH',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}</p>
+  <table><thead><tr><th>Art.-Nr.</th><th>Artikel</th><th>Kategorie</th><th>Gebinde</th><th>Gesamtmenge</th><th>Verteilt auf</th></tr></thead><tbody>
+  ${rows.filter(r=>r.lief==='stardrinks').map(r=>`<tr><td>${r.nr||'–'}</td><td>${r.artikel}</td><td>${r.katLabel}</td><td>${r.geb}</td><td><strong>${fmtH(r.mengeGesamt,r.kat)}</strong></td><td style="font-size:11px;color:#666">${r.schiffe.join(', ')}</td></tr>`).join('')}
+  </tbody></table>
+  <h3>ST. Laurentius</h3>
+  <table><thead><tr><th>Artikel</th><th>Gebinde</th><th>Gesamtmenge</th><th>Verteilt auf</th></tr></thead><tbody>
+  ${rows.filter(r=>r.lief==='st_laurentius').map(r=>`<tr><td>${r.artikel}</td><td>${r.geb}</td><td><strong>${fmtH(r.mengeGesamt,r.kat)}</strong></td><td style="font-size:11px;color:#666">${r.schiffe.join(', ')}</td></tr>`).join('')}
+  </tbody></table>
+  <h3>Weinbauern (Direktbestellung)</h3>
+  <table><thead><tr><th>Artikel</th><th>Weinbauer</th><th>Gesamtmenge</th><th>Verteilt auf</th></tr></thead><tbody>
+  ${rows.filter(r=>r.lief==='weinbauer').map(r=>`<tr><td>${r.artikel}</td><td>${r.wb||'–'}</td><td><strong>${fmtH(r.mengeGesamt,r.kat)}</strong></td><td style="font-size:11px;color:#666">${r.schiffe.join(', ')}</td></tr>`).join('')}
+  </tbody></table>
+  </body></html>`);
+  w.print();
+}
+
+function printListeProSchiff(){
+  const offen=[];
+  SCHIFFE_L.forEach(({id,name,icon})=>{
+    if(!state[id])return;
+    KATEGORIEN.forEach(k=>{
+      state[id][k.id].forEach((r,i)=>{
+        if(r.bestellt){const p=PRODUKTE[k.id][i];offen.push({schiff:id,schiffName:name,icon,artikel:p.name,geb:p.geb||'',kat:k.id,katLabel:k.label,menge:r.bestellMenge||1,lief:p.lief,nr:p.nr||''});}
+      });
+    });
   });
   const w=window.open('','_blank');
-  w.document.write(`<html><head><title>SZR Bestellliste ${new Date().toLocaleDateString('de-CH')}</title>
-  <style>body{font-family:sans-serif;font-size:13px;padding:20px}h2{margin-bottom:4px}p{color:#666;margin-bottom:16px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #ddd;padding:7px 10px}th{background:#f5f5f5;font-weight:600}</style></head>
-  <body><h2>SZR Bestellliste</h2><p>${new Date().toLocaleDateString('de-CH',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}</p>
-  <table><thead><tr><th>Schiff</th><th>Kategorie</th><th>Artikel</th><th>Ist</th><th>Soll</th></tr></thead>
-  <tbody>${items.map(it=>`<tr><td>${it.schiff}</td><td>${it.katLabel}</td><td>${it.artikel}</td><td>${fmtH(it.r.bestand,it.kat)}</td><td>${fmtH(it.r.soll,it.kat)}</td></tr>`).join('')}</tbody>
-  </table></body></html>`);
-  w.print();
+  let html=`<html><head><title>Bestellliste Pro Schiff ${new Date().toLocaleDateString('de-CH')}</title>
+  <style>body{font-family:sans-serif;font-size:13px;padding:20px}h2,h3{margin-bottom:6px}p{color:#666;margin-bottom:12px}table{width:100%;border-collapse:collapse;margin-bottom:24px}th,td{border:1px solid #ddd;padding:7px 10px}th{background:#f5f5f5;font-weight:600}.page-break{page-break-after:always}</style></head><body>
+  <h2>Bestellliste pro Schiff</h2><p>${new Date().toLocaleDateString('de-CH',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}</p>`;
+  SCHIFFE_L.forEach(({id,name,icon})=>{
+    const rows=offen.filter(r=>r.schiff===id);
+    if(!rows.length)return;
+    html+=`<h3>${icon} ${name}</h3><table><thead><tr><th>Art.-Nr.</th><th>Artikel</th><th>Kat.</th><th>Gebinde</th><th>Menge</th><th>Lieferant</th></tr></thead><tbody>
+    ${rows.map(r=>`<tr><td>${r.nr||'–'}</td><td>${r.artikel}</td><td>${r.katLabel}</td><td>${r.geb}</td><td><strong>${fmtH(r.menge,r.kat)}</strong></td><td>${r.lief==='stardrinks'?'Stardrinks':r.lief==='st_laurentius'?'ST. Laurentius':r.wb||'Weinbauer'}</td></tr>`).join('')}
+    </tbody></table>`;
+  });
+  html+='</body></html>';
+  w.document.write(html);w.print();
+}
+
+function printLieferschein(){
+  const bestellt=bestellungen.filter(b=>b.status==='bestellt');
+  const bySchiff={};
+  bestellt.forEach(b=>{
+    const z=b.zielSchiff||b.schiff;
+    if(!bySchiff[z])bySchiff[z]=[];
+    bySchiff[z].push(b);
+  });
+  const w=window.open('','_blank');
+  let html=`<html><head><title>Lieferschein ${new Date().toLocaleDateString('de-CH')}</title>
+  <style>body{font-family:sans-serif;font-size:13px;padding:20px}h2,h3{margin-bottom:6px}p{color:#666;margin-bottom:12px}table{width:100%;border-collapse:collapse;margin-bottom:24px}th,td{border:1px solid #ddd;padding:7px 10px}th{background:#f5f5f5;font-weight:600}</style></head><body>
+  <h2>Lieferschein — SZR</h2><p>${new Date().toLocaleDateString('de-CH',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}</p>`;
+  Object.entries(bySchiff).forEach(([schiffId,rows])=>{
+    const info=SCHIFFE_L.find(s=>s.id===schiffId)||{icon:'🚢',name:schiffId};
+    html+=`<h3>${info.icon} ${info.name}</h3><table><thead><tr><th>Artikel</th><th>Kategorie</th><th>Menge</th><th>Lieferant</th></tr></thead><tbody>
+    ${rows.map(r=>`<tr><td>${r.artikel}</td><td>${r.katLabel}</td><td><strong>${fmtH(r.menge,r.kat)}</strong></td><td>${r.lief==='stardrinks'?'Stardrinks':r.lief==='st_laurentius'?'ST. Laurentius':r.wb||'Weinbauer'}</td></tr>`).join('')}
+    </tbody></table>`;
+  });
+  html+='</body></html>';
+  w.document.write(html);w.print();
 }
 
 // INIT
