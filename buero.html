@@ -646,27 +646,34 @@ async function geliefert(bid){
   b.geliefertDatum=now();
   saveBest();
 
-  // Splits nutzen falls vorhanden, sonst Fallback
   const splits=b.splits&&b.splits.length>0?b.splits:[{schiff:b.zielSchiff||b.schiff,menge:b.menge}];
+  const idx=PRODUKTE[b.kat].findIndex(p=>p.name===b.artikel);
 
   for(const sp of splits){
-    const ziel=sp.schiff;
-    const idx=PRODUKTE[b.kat].findIndex(p=>p.name===b.artikel);
-    if(idx>=0&&state[ziel]){
-      // Bestand erhöhen atomar via Supabase Funktion
-      await rpc('adjust_bestand',{p_standort:ziel,p_kat:b.kat,p_artikel_index:idx,p_delta:sp.menge});
-      // Log
-      await fetch(`${SB}/rest/v1/transaktionen2`,{method:'POST',headers:H,
-        body:JSON.stringify({zeitpunkt:now(),typ:'Lieferung',von:'Lieferant',nach:ziel,artikel:b.artikel,menge:sp.menge,einheit:KATEGORIEN.find(k=>k.id===b.kat)?.einheit||'',kat:b.kat})});
+    if(idx<0)continue;
+    // Atomar in Supabase erhöhen
+    await rpc('adjust_bestand',{p_standort:sp.schiff,p_kat:b.kat,p_artikel_index:idx,p_delta:sp.menge});
+    // Log
+    await fetch(`${SB}/rest/v1/transaktionen2`,{method:'POST',headers:H,
+      body:JSON.stringify({zeitpunkt:now(),typ:'Lieferung',von:'Lieferant',nach:sp.schiff,artikel:b.artikel,menge:sp.menge,einheit:KATEGORIEN.find(k=>k.id===b.kat)?.einheit||'',kat:b.kat})});
+  }
+
+  // Bestellt-Flag entfernen
+  if(idx>=0){
+    await rpc('set_bestand_meta',{p_standort:b.schiff,p_kat:b.kat,p_artikel_index:idx,p_bestellt:false,p_bestell_menge:0});
+  }
+
+  // Lokalen State sofort aktualisieren
+  splits.forEach(sp=>{
+    if(state[sp.schiff]&&state[sp.schiff][b.kat]&&idx>=0){
+      state[sp.schiff][b.kat][idx].bestand=Math.round((state[sp.schiff][b.kat][idx].bestand+sp.menge)*2)/2;
     }
+  });
+  if(state[b.schiff]&&state[b.schiff][b.kat]&&idx>=0){
+    state[b.schiff][b.kat][idx].bestellt=0;
+    state[b.schiff][b.kat][idx].bestellMenge=0;
   }
-
-  // Bestellt-Flag auf dem ursprünglichen Schiff entfernen
-  const origIdx=PRODUKTE[b.kat].findIndex(p=>p.name===b.artikel);
-  if(origIdx>=0){
-    await rpc('set_bestand_meta',{p_standort:b.schiff,p_kat:b.kat,p_artikel_index:origIdx,p_bestellt:false,p_bestell_menge:0});
-  }
-
+  save();
   await doSync();
 }
 
@@ -675,7 +682,93 @@ function zurueckZuOffen(bid){
   if(b){b.status='offen_archiv';saveBest();renderPage();}
 }
 
-// PRINT LISTS
+// Split Funktionen
+function addSplit(bid){
+  const b=bestellungen.find(b=>b.id===bid);
+  if(!b)return;
+  if(!b.splits||b.splits.length===0)b.splits=[{schiff:b.schiff,menge:b.menge}];
+  b.splits.push({schiff:SCHIFFE_L[0].id,menge:1});
+  saveBest();renderPage();
+}
+function removeSplit(bid,si){
+  const b=bestellungen.find(b=>b.id===bid);
+  if(!b||!b.splits||b.splits.length<=1)return;
+  b.splits.splice(si,1);
+  saveBest();renderPage();
+}
+function changeSplitSchiff(bid,si,val){
+  const b=bestellungen.find(b=>b.id===bid);
+  if(!b||!b.splits||!b.splits[si])return;
+  b.splits[si].schiff=val;
+  saveBest();
+}
+function changeSplitMenge(bid,si,delta){
+  const b=bestellungen.find(b=>b.id===bid);
+  if(!b||!b.splits||!b.splits[si])return;
+  b.splits[si].menge=Math.max(1,Math.round(b.splits[si].menge+delta));
+  saveBest();renderPage();
+}
+
+// ════════════════════════════════════════
+// MODAL — Manuell hinzufügen
+// ════════════════════════════════════════
+let modal=null;
+let manuelF={kat:'soft',art:0,menge:1,schiff:'MS Rhystern'};
+
+function openManuelHinzu(){modal='manuel';renderModal();}
+function closeModal(){modal=null;renderModal();}
+
+function renderModal(){
+  const root=document.getElementById('modal-root');
+  if(!modal||!root){root&&(root.innerHTML='');return;}
+  if(modal==='manuel'){
+    const katOpts=KATEGORIEN.map(k=>`<option value="${k.id}" ${manuelF.kat===k.id?'selected':''}>${k.label}</option>`).join('');
+    const artOpts=PRODUKTE[manuelF.kat].map((p,i)=>`<option value="${i}" ${manuelF.art===i?'selected':''}>${p.name}</option>`).join('');
+    const schiffOpts=SCHIFFE_L.map(s=>`<option value="${s.id}" ${manuelF.schiff===s.id?'selected':''}>${s.icon} ${s.name}</option>`).join('');
+    const u=KATEGORIEN.find(k=>k.id===manuelF.kat)?.einheit||'';
+    root.innerHTML=`<div class="overlay" onclick="closeModal()"><div class="sheet" onclick="event.stopPropagation()">
+      <div class="handle"></div>
+      <div class="sh-title">Manuell hinzufügen</div>
+      <div class="sh-sub">Artikel direkt zur Bestellliste (Stufe 2) hinzufügen</div>
+      <div style="padding:0 20px 12px">
+        <div class="sh-label" style="margin-bottom:6px">Kategorie</div>
+        <select class="sh-select" onchange="manuelF.kat=this.value;manuelF.art=0;renderModal()">${katOpts}</select>
+        <div class="sh-label" style="margin-bottom:6px">Artikel</div>
+        <select class="sh-select" onchange="manuelF.art=parseInt(this.value)">${artOpts}</select>
+        <div class="sh-label" style="margin-bottom:6px">Für Schiff</div>
+        <select class="sh-select" onchange="manuelF.schiff=this.value">${schiffOpts}</select>
+        <div class="sh-label" style="margin-bottom:6px">Menge (ganze Einheiten)</div>
+        <div class="mp">
+          <button class="mp-btn mp-m" onclick="manuelF.menge=Math.max(1,manuelF.menge-1);renderModal()">−</button>
+          <div class="mp-val"><div class="mp-num">${manuelF.menge} ${u}</div></div>
+          <button class="mp-btn mp-p" onclick="manuelF.menge=manuelF.menge+1;renderModal()">+</button>
+        </div>
+      </div>
+      <button class="act-btn ab-blue" onclick="commitManuel()">Zur Bestellliste hinzufügen</button>
+      <button class="act-btn" style="background:var(--bg3);color:var(--text3);margin-top:8px" onclick="closeModal()">Abbrechen</button>
+    </div></div>`;
+  }
+}
+
+function commitManuel(){
+  const p=PRODUKTE[manuelF.kat][manuelF.art];
+  const info=SCHIFFE_L.find(s=>s.id===manuelF.schiff);
+  const b={
+    id:Date.now()+'_'+Math.random().toString(36).slice(2),
+    key:'manuel_'+Date.now(),
+    idx:-1,
+    schiff:manuelF.schiff,schiffName:info.name,icon:info.icon,
+    artikel:p.name,geb:p.geb||'',kat:manuelF.kat,
+    katLabel:KATEGORIEN.find(k=>k.id===manuelF.kat)?.label||'',
+    menge:manuelF.menge,lief:p.lief,wb:p.wb||'',
+    status:'bestellt',datum:now(),
+    splits:[{schiff:manuelF.schiff,menge:manuelF.menge}]
+  };
+  bestellungen.unshift(b);saveBest();
+  closeModal();renderPage();
+}
+
+
 function printListeGesamt(){
   const offen=[];
   SCHIFFE_L.forEach(({id,name,icon})=>{
