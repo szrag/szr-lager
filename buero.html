@@ -8,191 +8,128 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="SZR Büro">
 <meta name="theme-color" content="#f2f2f7">
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-:root {
-  --bg:#f2f2f7;--bg2:#ffffff;--bg3:#e5e5ea;
-  --blue:#007aff;--blue-l:#e8f3ff;--blue-d:#0055cc;
+:root{
+  --bg:#f2f2f7;--bg2:#fff;--bg3:#e5e5ea;
+  --blue:#007aff;--blue-l:#e8f3ff;
   --green:#34c759;--green-l:#e8f8ed;
   --orange:#ff9500;--orange-l:#fff5e6;
   --red:#ff3b30;--red-l:#ffe8e7;
   --purple:#af52de;--purple-l:#f3e8ff;
+  --brown:#8b4513;--brown-l:#fdf0e6;
   --text:#1c1c1e;--text2:#3a3a3c;--text3:#6c6c70;--text4:#aeaeb2;
   --border:rgba(0,0,0,0.08);
   --sh:0 1px 3px rgba(0,0,0,0.06),0 1px 2px rgba(0,0,0,0.04);
-  --sh-md:0 4px 16px rgba(0,0,0,0.08),0 1px 4px rgba(0,0,0,0.05);
   --r:16px;--rs:10px;--rxs:8px;
   --font:'DM Sans',-apple-system,sans-serif;
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased}
-
-/* ── LAYOUT ── */
-.app{display:flex;flex-direction:column;min-height:100vh}
-
-/* ── HEADER ── */
-.header{background:rgba(242,242,247,0.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);padding:52px 20px 14px;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:50}
-.header-inner{display:flex;align-items:center;gap:12px}
-.header-logo{width:36px;height:36px;background:var(--blue);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
-.header-title{font-size:20px;font-weight:700;flex:1}
-.header-date{font-size:13px;color:var(--text3)}
-.sync-pill{display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer}
-.sync-pill.ok{background:var(--green-l);color:var(--green)}
-.sync-pill.err{background:var(--red-l);color:var(--red)}
-.sync-pill.off{background:var(--bg3);color:var(--text3)}
+.hdr{background:rgba(242,242,247,0.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);padding:52px 16px 12px;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:50}
+.hdr-row{display:flex;align-items:center;gap:10px}
+.hdr-title{font-size:19px;font-weight:700;flex:1}
+.hdr-date{font-size:12px;color:var(--text3);margin-top:2px}
+.sync-pill{display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap}
+.sp-ok{background:var(--green-l);color:var(--green)}
+.sp-err{background:var(--red-l);color:var(--red)}
+.sp-off{background:var(--bg3);color:var(--text3)}
 .sync-dot{width:6px;height:6px;border-radius:50%;background:currentColor}
-
-/* ── BOTTOM NAV ── */
+.scroll{flex:1;overflow-y:auto;padding:12px 16px 100px}
+.scroll::-webkit-scrollbar{display:none}
 .bottom-nav{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,0.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid var(--border);display:flex;padding:8px 0 20px;z-index:50}
 .nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px 0;border:none;background:transparent;cursor:pointer;font-family:var(--font)}
 .nav-icon{font-size:22px;line-height:1;position:relative}
 .nav-label{font-size:10px;font-weight:500;color:var(--text4)}
 .nav-item.active .nav-label{color:var(--blue)}
-.nav-badge{position:absolute;top:-4px;right:-10px;background:var(--red);color:white;font-size:10px;font-weight:700;min-width:16px;height:16px;border-radius:8px;display:flex;align-items:center;justify-content:center;padding:0 4px}
-
-/* ── SCROLL ── */
-.scroll{flex:1;overflow-y:auto;padding:16px 16px 100px}
-.scroll::-webkit-scrollbar{display:none}
-
-/* ── CARDS ── */
-.card{background:var(--bg2);border-radius:var(--r);box-shadow:var(--sh);overflow:hidden;margin-bottom:12px}
-.card-header{padding:14px 16px 10px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
-.card-title{font-size:13px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.05em}
-
-/* ── STAT GRID ── */
-.stat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px}
-.stat-card{background:var(--bg2);border-radius:var(--r);padding:16px;box-shadow:var(--sh);display:flex;flex-direction:column;gap:4px}
-.stat-icon{font-size:24px;margin-bottom:4px}
-.stat-label{font-size:12px;color:var(--text3);font-weight:500}
-.stat-val{font-size:28px;font-weight:700}
-.stat-sub{font-size:12px;color:var(--text3)}
-
-/* ── SCHIFF OVERVIEW ── */
-.schiff-row{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border);cursor:pointer}
+.nav-badge{position:absolute;top:-4px;right:-10px;background:var(--red);color:#fff;font-size:10px;font-weight:700;min-width:16px;height:16px;border-radius:8px;display:flex;align-items:center;justify-content:center;padding:0 4px}
+.card{background:#fff;border-radius:var(--r);box-shadow:var(--sh);overflow:hidden;margin-bottom:12px}
+.stat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:14px}
+.stat{background:#fff;border-radius:var(--r);padding:14px;box-shadow:var(--sh)}
+.stat-icon{font-size:22px;margin-bottom:4px}
+.stat-label{font-size:11px;color:var(--text3);font-weight:500}
+.stat-val{font-size:26px;font-weight:700}
+.stitle{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin:14px 0 7px}
+.alert-row{display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:var(--rs);margin-bottom:7px;border:1px solid}
+.ar-red{background:var(--red-l);border-color:rgba(255,59,48,.15);color:var(--red)}
+.ar-orange{background:var(--orange-l);border-color:rgba(255,149,0,.15);color:var(--orange)}
+.ar-icon{font-size:16px;flex-shrink:0}
+.ar-info{flex:1}
+.ar-title{font-size:13px;font-weight:700}
+.ar-sub{font-size:11px;opacity:.8;margin-top:1px}
+.tag{display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700}
+.t-ok{background:var(--green-l);color:var(--green)}
+.t-warn{background:var(--orange-l);color:var(--orange)}
+.t-bad{background:var(--red-l);color:var(--red)}
+.schiff-row{display:flex;align-items:center;gap:10px;padding:13px 14px;border-bottom:1px solid var(--border);cursor:pointer}
 .schiff-row:last-child{border-bottom:none}
-.schiff-row:active{background:var(--bg)}
-.sr-icon{font-size:28px;flex-shrink:0}
+.sr-icon{font-size:26px;flex-shrink:0}
 .sr-info{flex:1}
-.sr-name{font-size:16px;font-weight:600}
-.sr-sub{font-size:13px;color:var(--text3);margin-top:2px}
-.sr-right{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
-.status-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0}
-
-/* ── TABLE ── */
-.tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
-table{width:100%;border-collapse:collapse;font-size:13px}
-th{text-align:left;padding:8px 12px;background:var(--bg);color:var(--text3);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap;border-bottom:1px solid var(--border)}
-td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
-tr:last-child td{border-bottom:none}
-.cat-cell{background:var(--bg);font-weight:700;font-size:11px;color:var(--text3);padding:6px 12px;text-transform:uppercase;letter-spacing:.04em}
-
-/* ── SOLL INPUT ── */
-.soll-input{width:56px;padding:5px 6px;border:1.5px solid var(--border);border-radius:var(--rxs);font-size:13px;text-align:center;background:var(--bg);color:var(--text);font-family:var(--font)}
-.soll-input:focus{outline:none;border-color:var(--blue)}
-
-/* ── TAGS ── */
-.tag{display:inline-flex;align-items:center;padding:3px 8px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap}
-.tag-ok{background:var(--green-l);color:var(--green)}
-.tag-warn{background:var(--orange-l);color:var(--orange)}
-.tag-bad{background:var(--red-l);color:var(--red)}
-.tag-none{background:var(--bg3);color:var(--text3)}
-.tag-blue{background:var(--blue-l);color:var(--blue)}
-
-/* ── BESTELLUNG ── */
-.bestell-item{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border)}
+.sr-name{font-size:15px;font-weight:600}
+.sr-sub{font-size:12px;color:var(--text3);margin-top:2px}
+.status-dot{width:10px;height:10px;border-radius:50%}
+.bestell-item{display:flex;align-items:center;gap:10px;padding:13px 14px;border-bottom:1px solid var(--border)}
 .bestell-item:last-child{border-bottom:none}
-.bi-icon{width:44px;height:44px;border-radius:12px;background:var(--orange-l);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
-.bi-icon.red{background:var(--red-l)}
+.bi-icon{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
 .bi-info{flex:1}
-.bi-name{font-size:15px;font-weight:600}
-.bi-detail{font-size:12px;color:var(--text3);margin-top:3px}
-.bi-schiff{font-size:11px;font-weight:600;color:var(--blue);margin-top:3px}
-.bi-btn{padding:7px 14px;border-radius:20px;border:none;cursor:pointer;font-size:13px;font-weight:600;font-family:var(--font);background:var(--green);color:white;white-space:nowrap}
-
-/* ── LOG ── */
-.log-item{display:flex;gap:12px;padding:12px 16px;border-bottom:1px solid var(--border)}
+.bi-name{font-size:14px;font-weight:600}
+.bi-detail{font-size:11px;color:var(--text3);margin-top:3px}
+.bi-schiff{font-size:11px;font-weight:600;color:var(--blue);margin-top:2px}
+.bi-btn{padding:6px 12px;border-radius:20px;border:none;cursor:pointer;font-size:12px;font-weight:600;font-family:var(--font);background:var(--green);color:#fff}
+.seg{display:flex;background:var(--bg3);border-radius:10px;padding:2px;margin-bottom:12px}
+.seg-btn{flex:1;padding:6px 2px;border:none;background:transparent;border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;color:var(--text3);font-family:var(--font)}
+.seg-btn.active{background:#fff;color:var(--text);font-weight:700;box-shadow:var(--sh)}
+.tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{text-align:left;padding:7px 10px;background:var(--bg);color:var(--text3);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap;border-bottom:1px solid var(--border)}
+td{padding:9px 10px;border-bottom:1px solid var(--border);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+.soll-inp{width:52px;padding:4px 5px;border:1.5px solid var(--border);border-radius:var(--rxs);font-size:12px;text-align:center;background:var(--bg);color:var(--text);font-family:var(--font)}
+.soll-inp:focus{outline:none;border-color:var(--blue)}
+.cat-cell{background:var(--bg);font-weight:700;font-size:10px;color:var(--text3);padding:5px 10px;text-transform:uppercase;letter-spacing:.04em}
+.sh-select{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:var(--rs);font-size:15px;font-family:var(--font);background:var(--bg);color:var(--text);appearance:none;margin-bottom:14px}
+.kb-row{display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid var(--border)}
+.kb-row:last-child{border-bottom:none}
+.kb-label{font-size:12px;font-weight:500;width:90px;flex-shrink:0}
+.kb-track{flex:1;background:var(--bg3);border-radius:4px;height:7px;overflow:hidden}
+.kb-fill{height:100%;border-radius:4px;background:var(--blue)}
+.kb-val{font-size:12px;font-weight:600;width:60px;text-align:right;flex-shrink:0}
+.log-item{display:flex;gap:10px;padding:10px 14px;border-bottom:1px solid var(--border)}
 .log-item:last-child{border-bottom:none}
-.log-dot-col{display:flex;flex-direction:column;align-items:center;padding-top:4px}
-.log-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
-.log-line{width:1px;flex:1;background:var(--border);margin-top:4px}
+.log-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;margin-top:3px}
 .log-body{flex:1}
-.log-title{font-size:14px;font-weight:600}
-.log-sub{font-size:12px;color:var(--text3);margin-top:2px}
-.log-time{font-size:11px;color:var(--text4);margin-top:3px}
-
-/* ── SEGMENT ── */
-.segment{display:flex;background:var(--bg3);border-radius:10px;padding:2px;margin-bottom:14px}
-.seg-btn{flex:1;padding:7px 4px;border:none;background:transparent;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;color:var(--text3);font-family:var(--font)}
-.seg-btn.active{background:white;color:var(--text);font-weight:600;box-shadow:var(--sh)}
-
-/* ── SECTION TITLE ── */
-.sec-title{font-size:13px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin:16px 0 8px}
-
-/* ── ALERT BANNER ── */
-.alert-banner{display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:var(--rs);margin-bottom:8px;border:1px solid}
-.ab-red{background:var(--red-l);border-color:rgba(255,59,48,.2);color:var(--red)}
-.ab-orange{background:var(--orange-l);border-color:rgba(255,149,0,.2);color:var(--orange)}
-.ab-icon{font-size:18px;flex-shrink:0}
-.ab-info{flex:1}
-.ab-title{font-size:13px;font-weight:700}
-.ab-sub{font-size:12px;opacity:.8;margin-top:1px}
-
-/* ── PRINT BTN ── */
-.print-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px;border-radius:var(--rs);border:1.5px solid var(--border);background:white;font-size:15px;font-weight:600;cursor:pointer;font-family:var(--font);margin-top:8px}
-
-/* ── KOSTEN CHART ── */
-.kosten-bar{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
-.kosten-bar:last-child{border-bottom:none}
-.kb-label{font-size:13px;font-weight:500;width:100px;flex-shrink:0}
-.kb-track{flex:1;background:var(--bg3);border-radius:4px;height:8px;overflow:hidden}
-.kb-fill{height:100%;border-radius:4px;background:var(--blue);transition:width .3s}
-.kb-val{font-size:13px;font-weight:600;width:70px;text-align:right;flex-shrink:0}
-
-/* ── MODAL ── */
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:200;display:flex;align-items:flex-end;justify-content:center}
-.modal-sheet{background:var(--bg2);border-radius:20px 20px 0 0;width:100%;max-width:560px;max-height:90vh;overflow-y:auto;padding:8px 0 40px}
-.modal-handle{width:36px;height:4px;background:var(--bg3);border-radius:2px;margin:8px auto 20px}
-.modal-title{font-size:20px;font-weight:700;padding:0 20px 4px}
-.modal-sub{font-size:14px;color:var(--text3);padding:0 20px 20px}
-.modal-sec{padding:0 20px 14px}
-.modal-label{font-size:12px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}
-.modal-select{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:var(--rs);font-size:15px;font-family:var(--font);background:var(--bg);color:var(--text);appearance:none}
-.action-btn{width:calc(100% - 40px);margin:8px 20px 0;padding:16px;border-radius:var(--rs);border:none;cursor:pointer;font-size:17px;font-weight:600;font-family:var(--font);background:var(--blue);color:white}
-
-/* ── EMPTY ── */
-.empty{padding:40px 24px;text-align:center}
-.empty-icon{font-size:44px;margin-bottom:12px}
-.empty-title{font-size:17px;font-weight:600;color:var(--text2);margin-bottom:6px}
-.empty-sub{font-size:14px;color:var(--text3)}
-
-@media print{.header,.bottom-nav,.print-btn,.action-btn{display:none!important}.scroll{padding:0}}
+.log-title{font-size:13px;font-weight:600}
+.log-sub{font-size:11px;color:var(--text3);margin-top:2px}
+.log-time{font-size:10px;color:var(--text4);margin-top:3px}
+.print-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:13px;border-radius:var(--rs);border:1.5px solid var(--border);background:#fff;font-size:14px;font-weight:600;cursor:pointer;font-family:var(--font);margin-top:8px}
+.empty{padding:36px 20px;text-align:center}
+.empty-icon{font-size:40px;margin-bottom:10px}
+.empty-title{font-size:16px;font-weight:600;color:var(--text2);margin-bottom:5px}
+.empty-sub{font-size:13px;color:var(--text3)}
+@media print{.hdr,.bottom-nav,.print-btn{display:none!important}.scroll{padding:0}}
 </style>
 </head>
 <body>
-<div class="app">
-
-<div class="header">
-  <div class="header-inner">
-    <div class="header-logo">🏢</div>
+<div style="display:flex;flex-direction:column;min-height:100vh">
+<div class="hdr">
+  <div class="hdr-row">
     <div style="flex:1">
-      <div class="header-title">SZR Büro</div>
-      <div class="header-date" id="header-date"></div>
+      <div class="hdr-title">SZR Büro</div>
+      <div class="hdr-date" id="hdr-date"></div>
     </div>
-    <div class="sync-pill off" id="sync-pill" onclick="syncAll()">
+    <div class="sync-pill sp-off" id="sync-pill" onclick="doSync()">
       <div class="sync-dot"></div><span id="sync-txt">Offline</span>
     </div>
   </div>
 </div>
-
-<div class="scroll" id="main-scroll">
+<div class="scroll" id="main-scroll" style="flex:1">
   <div style="padding:40px;text-align:center;color:var(--text3)">Wird geladen…</div>
 </div>
-
 <div class="bottom-nav">
   <button class="nav-item active" id="nav-dashboard" onclick="setPage('dashboard',this)">
     <div class="nav-icon">📊</div><div class="nav-label">Dashboard</div>
   </button>
-  <button class="nav-item" id="nav-bestellungen" onclick="setPage('bestellungen',this)">
+  <button class="nav-item" id="nav-bestell" onclick="setPage('bestell',this)">
     <div class="nav-icon" style="position:relative">📦<span class="nav-badge" id="bestell-badge" style="display:none">0</span></div>
     <div class="nav-label">Bestellungen</div>
   </button>
@@ -206,403 +143,332 @@ tr:last-child td{border-bottom:none}
     <div class="nav-icon">📋</div><div class="nav-label">Aktivität</div>
   </button>
 </div>
-
 </div>
-<div id="modal-root"></div>
 
 <script>
-// ═══════════════════════════════════════
-// DATA (shared with ship app via localStorage)
-// ═══════════════════════════════════════
 const SCHIFFE_L=[
   {id:'Bootshaus',name:'Bootshaus',icon:'🏠',type:'Hauptlager'},
   {id:'MS Rhystern',name:'MS Rhystern',icon:'🚢',type:'Grosses Schiff'},
   {id:'MS Rhenus',name:'MS Rhenus',icon:'🚢',type:'Grosses Schiff'},
   {id:'MS Hecht',name:'MS Hecht',icon:'🚤',type:'Schiff'},
 ];
-const SCHIFFE_K=[
-  {id:'MW Neptun',name:'MW Neptun',icon:'⛵',type:'Kleines Schiff'},
-  {id:'MW Nautilus',name:'MW Nautilus',icon:'⛵',type:'Kleines Schiff'},
-  {id:'MS Flipper',name:'MS Flipper',icon:'🛥',type:'Kleines Schiff'},
+const KATEGORIEN=[
+  {id:'soft',label:'Softgetränke',einheit:'Hr.',color:'var(--blue)'},
+  {id:'wein',label:'Wein',einheit:'6er-Einh.',color:'var(--purple)'},
+  {id:'bier',label:'Bier',einheit:'20er-Krt.',color:'var(--brown)'},
+  {id:'spirits',label:'Spirituosen',einheit:'Fl.',color:'var(--orange)'},
 ];
+const PRODUKTE={
+  soft:[
+    {nr:'10301',name:'Rivella Rot',geb:'24x33cl',chf:25.91},
+    {nr:'10406',name:'Eptinger rot m. Kohlens.',geb:'12x1l',chf:12.75},
+    {nr:'10641',name:'Schweppes Indian Tonic',geb:'30x20cl',chf:28.30},
+    {nr:'10742',name:'Eptinger blau o. Kohlens.',geb:'12x1l',chf:12.75},
+    {nr:'14381',name:'Red Bull Original',geb:'24x25cl',chf:28.67},
+    {nr:'15273',name:'Eptinger blau 33cl',geb:'24x33cl',chf:21.62},
+    {nr:'39390',name:'Möhl Saft alkoholfrei',geb:'15x50cl',chf:22.69},
+    {nr:'52833',name:'Calanda Radler',geb:'24x33cl',chf:28.46},
+    {nr:'10309',name:'Elmer Citro',geb:'24x33cl',chf:21.06},
+    {nr:'39167',name:'Schweppes Ginger Ale',geb:'4x6x50cl',chf:30.95},
+    {nr:'42837',name:'Appenzeller Leermond',geb:'24x33cl',chf:44.40},
+    {nr:'56077',name:'Vivi Kola Zéro',geb:'24x33cl',chf:37.44},
+    {nr:'56078',name:'Vivi Kola Original',geb:'24x33cl',chf:37.44},
+    {nr:'67355',name:'Vivi Soda BIO Apfelschorle',geb:'24x33cl',chf:37.74},
+    {nr:'67356',name:'Vivi Soda BIO Zitrone Ingwer',geb:'24x33cl',chf:37.74},
+    {nr:'10306',name:'Eptinger rot 33cl',geb:'24x33cl',chf:21.62},
+    {nr:'62276',name:'Vivitz Bio Eistee',geb:'4x6x50cl',chf:48.20},
+    {nr:'68737',name:'Vivi BIO Mate Cascara',geb:'24x33cl',chf:37.74},
+    {nr:'10707',name:'Ramseier Orangensaft',geb:'12x1l',chf:28.04},
+  ],
+  wein:[
+    {kat:'Schaumwein',name:'Secco alkoholfrei (Kellerei Rahm)'},
+    {kat:'Schaumwein',name:'Prosecco Contessa Giulia IT'},
+    {kat:'Weisswein',name:'Teufener Surprise'},
+    {kat:'Weisswein',name:'Teufener Riesling x Sylvaner'},
+    {kat:'Weisswein',name:'Teufener Federweiss (Blanc de Noir)'},
+    {kat:'Weisswein',name:'Teufener Pinot Gris'},
+    {kat:'Weisswein',name:'Freiensteiner Riesling x Sylvaner Auslese'},
+    {kat:'Weisswein',name:'Eglisauer Riesling x Sylvaner'},
+    {kat:'Weisswein',name:'Eglisauer Räuschling'},
+    {kat:'Weisswein',name:'Rüdlinger Federweiss'},
+    {kat:'Weisswein',name:'Buchberger Riesling x Sylvaner'},
+    {kat:'Weisswein',name:'Chardonnay California'},
+    {kat:'Rosé',name:'Buchberger Rosé'},
+    {kat:'Rotwein',name:'Teufener Blauburgunder classique'},
+    {kat:'Rotwein',name:'Freiensteiner Pinot Schwarz 12'},
+    {kat:'Rotwein',name:'Eglisauer Pinot Noir Auslese'},
+    {kat:'Rotwein',name:'Eglisauer Pinot Noir Selection Stadtberg'},
+    {kat:'Rotwein',name:'Rüdlinger Pinot Noir aus alten Reben'},
+    {kat:'Rotwein',name:'Buchberger Blauburgunder 5dl'},
+    {kat:'Rotwein',name:'Buchberger Blauburgunder 7dl'},
+    {kat:'Rotwein',name:'Cabernet Sauvignon California'},
+    {kat:'Rotwein',name:'Salento IGT Primitivo – Conti Zecca'},
+  ],
+  bier:[
+    {name:'ST. Laurentius Hell Lager',geb:'20x33cl'},
+    {name:'ST. Laurentius Liquid Sunshine',geb:'20x33cl'},
+  ],
+  spirits:[
+    {name:'Aperol',geb:'1 Fl.'},
+    {name:'Martini',geb:'1 Fl.'},
+    {name:'Campari',geb:'1 Fl.'},
+    {name:'Kirschwasser',geb:'1 Fl.'},
+    {name:'Williamsbirne',geb:'1 Fl.'},
+    {name:'Baileys',geb:'1 Fl.'},
+    {name:'Gin',geb:'1 Fl.'},
+    {name:'Limoncello',geb:'1 Fl.'},
+    {name:'Grappa',geb:'1 Fl.'},
+  ],
+};
 
-const SOFT=[
-  {nr:'10301',name:'Rivella Rot',geb:'24x33cl',chf:25.91},
-  {nr:'10406',name:'Eptinger rot m. Kohlens.',geb:'12x1l',chf:12.75},
-  {nr:'10641',name:'Schweppes Indian Tonic',geb:'30x20cl',chf:28.30},
-  {nr:'10742',name:'Eptinger blau o. Kohlens.',geb:'12x1l',chf:12.75},
-  {nr:'14381',name:'Red Bull Original',geb:'24x25cl',chf:28.67},
-  {nr:'15273',name:'Eptinger blau 33cl',geb:'24x33cl',chf:21.62},
-  {nr:'39390',name:'Möhl Saft alkoholfrei',geb:'15x50cl',chf:22.69},
-  {nr:'52833',name:'Calanda Radler',geb:'24x33cl',chf:28.46},
-  {nr:'10309',name:'Elmer Citro',geb:'24x33cl',chf:21.06},
-  {nr:'39167',name:'Schweppes Ginger Ale',geb:'4x6x50cl',chf:30.95},
-  {nr:'42837',name:'Appenzeller Leermond',geb:'24x33cl',chf:44.40},
-  {nr:'56077',name:'Vivi Kola Zéro',geb:'24x33cl',chf:37.44},
-  {nr:'56078',name:'Vivi Kola Original',geb:'24x33cl',chf:37.44},
-  {nr:'67355',name:'Vivi Soda Apfelschorle',geb:'24x33cl',chf:37.74},
-  {nr:'67356',name:'Vivi Soda Zitrone Ingwer',geb:'24x33cl',chf:37.74},
-  {nr:'10306',name:'Eptinger rot 33cl',geb:'24x33cl',chf:21.62},
-  {nr:'62276',name:'Vivitz Bio Eistee',geb:'4x6x50cl',chf:48.20},
-  {nr:'68737',name:'Vivi BIO Mate Cascara',geb:'24x33cl',chf:37.74},
-  {nr:'10707',name:'Ramseier Orangensaft',geb:'12x1l',chf:28.04},
-];
-const WEIN=[
-  {kat:'Schaumwein',name:'Secco alkoholfrei',vol:'7.5dl'},
-  {kat:'Schaumwein',name:'Prosecco Contessa Giulia',vol:'7.0dl'},
-  {kat:'Weisswein',name:'Teufener Surprise',vol:'5.0dl'},
-  {kat:'Weisswein',name:'Teufener Riesling x Sylvaner',vol:'7.5dl'},
-  {kat:'Weisswein',name:'Teufener Federweiss',vol:'7.5dl'},
-  {kat:'Weisswein',name:'Teufener Pinot Gris',vol:'7.5dl'},
-  {kat:'Weisswein',name:'Freiensteiner Riesling x Sylvaner',vol:'7.5dl'},
-  {kat:'Weisswein',name:'Eglisauer Riesling x Sylvaner',vol:'7.0dl'},
-  {kat:'Weisswein',name:'Eglisauer Räuschling',vol:'7.5dl'},
-  {kat:'Weisswein',name:'Rüdlinger Federweiss',vol:'5.0dl'},
-  {kat:'Weisswein',name:'Buchberger Riesling x Sylvaner',vol:'7.5dl'},
-  {kat:'Weisswein',name:'Chardonnay California',vol:'7.5dl'},
-  {kat:'Rosé',name:'Buchberger Rosé',vol:'5.0dl'},
-  {kat:'Rotwein',name:'Teufener Blauburgunder',vol:'7.5dl'},
-  {kat:'Rotwein',name:'Freiensteiner Pinot Schwarz',vol:'7.5dl'},
-  {kat:'Rotwein',name:'Eglisauer Pinot Noir Auslese',vol:'7.5dl'},
-  {kat:'Rotwein',name:'Eglisauer Pinot Noir Selection',vol:'7.5dl'},
-  {kat:'Rotwein',name:'Rüdlinger Pinot Noir',vol:'5.0dl'},
-  {kat:'Rotwein',name:'Buchberger Blauburgunder 5dl',vol:'5.0dl'},
-  {kat:'Rotwein',name:'Buchberger Blauburgunder 7dl',vol:'7.0dl'},
-  {kat:'Rotwein',name:'Cabernet Sauvignon California',vol:'7.5dl'},
-  {kat:'Rotwein',name:'Salento IGT Primitivo',vol:'7.5dl'},
-];
-
-// ═══════════════════════════════════════
 // SUPABASE
-// ═══════════════════════════════════════
-const SB_URL='https://ezgkryebktbamxyhemkv.supabase.co';
-const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV6Z2tyeWVia3RiYW14eWhlbWt2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc0ODY4ODksImV4cCI6MjA5MzA2Mjg4OX0.CZ0E_aCoCscgn4giXMgKoGhnKdgivrK9fgURbM0EKM0';
-const SB_H={'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY};
+const SB='https://ezgkryebktbamxyhemkv.supabase.co';
+const KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV6Z2tyeWVia3RiYW14eWhlbWt2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc0ODY4ODksImV4cCI6MjA5MzA2Mjg4OX0.CZ0E_aCoCscgn4giXMgKoGhnKdgivrK9fgURbM0EKM0';
+const H={'Content-Type':'application/json','apikey':KEY,'Authorization':'Bearer '+KEY};
+async function sbGet(t,q=''){try{const r=await fetch(`${SB}/rest/v1/${t}?${q}&limit=2000`,{headers:{...H,'Accept':'application/json'}});return r.ok?await r.json():null;}catch(e){return null;}}
+async function sbUpsert(t,d){try{const r=await fetch(`${SB}/rest/v1/${t}`,{method:'POST',headers:{...H,'Prefer':'resolution=merge-duplicates'},body:JSON.stringify(d)});return r.ok||r.status===201;}catch(e){return false;}}
 
-async function sbGet(table,filter=''){
-  try{const r=await fetch(`${SB_URL}/rest/v1/${table}?${filter}&limit=1000`,{headers:{...SB_H,'Accept':'application/json'}});return r.ok?await r.json():null;}catch(e){return null;}
-}
-async function sbUpsert(table,data){
-  try{const r=await fetch(`${SB_URL}/rest/v1/${table}`,{method:'POST',headers:{...SB_H,'Prefer':'resolution=merge-duplicates'},body:JSON.stringify(data)});return r.ok||r.status===201;}catch(e){return false;}
-}
+// STATE
+function initState(){const s={};SCHIFFE_L.forEach(({id})=>{s[id]={};KATEGORIEN.forEach(k=>{s[id][k.id]=PRODUKTE[k.id].map(()=>({bestand:0,soll:0,bestellt:0}));});});return s;}
+let state,log=[];
+try{state=JSON.parse(localStorage.getItem('szr_v5')||'null')||initState();}catch(e){state=initState();}
+try{log=JSON.parse(localStorage.getItem('szr_log_v5')||'[]');}catch(e){}
+function save(){try{localStorage.setItem('szr_v5',JSON.stringify(state));localStorage.setItem('szr_log_v5',JSON.stringify(log.slice(0,300)));}catch(e){}}
 
-let syncing=false, lastLocalChange={};
-function markChanged(st,typ,idx){lastLocalChange[`${st}_${typ}_${idx}`]=Date.now();}
-function recentlyChanged(st,typ,idx){return Date.now()-(lastLocalChange[`${st}_${typ}_${idx}`]||0)<90000;}
+let curPage='dashboard',sollKat='soft',sollSchiff='MS Rhystern';
 
-async function syncAll(){
-  if(syncing)return;
-  syncing=true;
+// SYNC
+let isSyncing=false;
+async function doSync(){
+  if(isSyncing)return;
+  isSyncing=true;
   const pill=document.getElementById('sync-pill');
   const txt=document.getElementById('sync-txt');
-  pill.className='sync-pill ok';txt.textContent='Synchronisiere…';
-  const items=await sbGet('lagerbestand');
-  if(!items){pill.className='sync-pill err';txt.textContent='Offline';syncing=false;return;}
-  items.forEach(it=>{
-    const st=it.standort,typ=it.typ,idx=it.artikel_index;
-    if(state[st]&&state[st][typ]&&state[st][typ][idx]!==undefined){
-      if(!recentlyChanged(st,typ,idx)){
-        state[st][typ][idx].bestand=parseFloat(it.bestand)||0;
-        state[st][typ][idx].soll=parseFloat(it.soll)||0;
-        state[st][typ][idx].bestellt=it.bestellt?1:0;
-        state[st][typ][idx].updated=it.updated_at||'';
+  if(pill)pill.className='sync-pill sp-ok';
+  if(txt)txt.textContent='Synchronisiere…';
+  const items=await sbGet('lagerbestand2');
+  if(items){
+    items.forEach(it=>{
+      const{standort,kat,artikel_index:idx,bestand,soll,bestellt}=it;
+      if(state[standort]&&state[standort][kat]&&state[standort][kat][idx]!==undefined){
+        state[standort][kat][idx].bestand=parseFloat(bestand)||0;
+        state[standort][kat][idx].soll=parseFloat(soll)||0;
+        state[standort][kat][idx].bestellt=bestellt?1:0;
       }
-    }
-  });
-  const li=await sbGet('transaktionen','order=zeitpunkt.desc');
-  if(li)log=li.map(t=>({zeit:t.zeitpunkt,typ:t.typ,von:t.von,nach:t.nach,artikel:t.artikel,menge:t.menge,einheit:t.einheit})).slice(0,200);
+    });
+  }
+  const li=await sbGet('transaktionen2','order=zeitpunkt.desc');
+  if(li)log=li.map(t=>({zeit:t.zeitpunkt,typ:t.typ,von:t.von,nach:t.nach,artikel:t.artikel,menge:t.menge,einheit:t.einheit,kat:t.kat})).slice(0,200);
   save();
-  pill.className='sync-pill ok';txt.textContent='Verbunden · '+fmtT(now());
-  syncing=false;
-  renderPage();
+  if(pill)pill.className=items?'sync-pill sp-ok':'sync-pill sp-err';
+  if(txt)txt.textContent=items?('Verbunden · '+fmtT(new Date().toISOString())):'Offline';
+  isSyncing=false;
+  renderPage();updateBadge();
 }
 
-async function pushSoll(schiff,typ,idx){
-  const r=state[schiff][typ][idx];
-  await sbUpsert('lagerbestand',{standort:schiff,typ,artikel_index:idx,bestand:r.bestand,soll:r.soll,bestellt:r.bestellt===1,updated_at:now()});
-}
-
-// ═══════════════════════════════════════
-// STATE
-// ═══════════════════════════════════════
-function initState(){
-  const s={};
-  SCHIFFE_L.forEach(({id})=>{s[id]={soft:SOFT.map(()=>({bestand:0,soll:0,bestellt:0,updated:''})),wein:WEIN.map(()=>({bestand:0,soll:0,bestellt:0,updated:''}))};});
-  return s;
-}
-let state,log=[];
-try{state=JSON.parse(localStorage.getItem('szr_ship_v1')||'null')||initState();}catch(e){state=initState();}
-try{log=JSON.parse(localStorage.getItem('szr_log_v1')||'[]');}catch(e){}
-function save(){try{localStorage.setItem('szr_ship_v1',JSON.stringify(state));localStorage.setItem('szr_log_v1',JSON.stringify(log.slice(0,300)));}catch(e){}}
-
-let currentPage='dashboard', sollTab='soft', sollSchiff='MS Rhystern', detailSchiff=null;
-
-// ═══════════════════════════════════════
 // HELPERS
-// ═══════════════════════════════════════
-function fmtH(v,typ){const u=typ==='wein'?'Einh.':'Hr.';if(v===0)return'0 '+u;if(v%1===0)return v+' '+u;return'½ '+u;}
-function fmtT(iso){if(!iso)return'–';try{const d=new Date(iso);return d.toLocaleDateString('de-CH',{day:'2-digit',month:'2-digit'})+' '+d.toLocaleTimeString('de-CH',{hour:'2-digit',minute:'2-digit'});}catch(e){return '';}}
-function fmtDate(iso){if(!iso)return'–';try{return new Date(iso).toLocaleDateString('de-CH',{weekday:'short',day:'numeric',month:'short'});}catch(e){return '';}}
 function now(){return new Date().toISOString();}
+function fmtH(v,kat){const u=KATEGORIEN.find(k=>k.id===kat)?.einheit||'';if(v===0)return'0 '+u;if(v%1===0)return v+' '+u;return'½ '+u;}
+function fmtT(iso){if(!iso)return'–';try{const d=new Date(iso);return d.toLocaleDateString('de-CH',{day:'2-digit',month:'2-digit'})+' '+d.toLocaleTimeString('de-CH',{hour:'2-digit',minute:'2-digit'});}catch(e){return'';}}
 function getStatus(b,s){if(b<=0)return'bad';if(s>0&&b<s)return'warn';return'ok';}
-function statusColor(s){return s==='bad'?'var(--red)':s==='warn'?'var(--orange)':'var(--green)';}
-function schiffStatus(id){
-  if(!state[id])return'ok';
-  let w='ok';
-  ['soft','wein'].forEach(typ=>{state[id][typ].forEach(r=>{const s=getStatus(r.bestand,r.soll);if(s==='bad')w='bad';else if(s==='warn'&&w!=='bad')w='warn';});});
-  return w;
-}
-function totalPending(){let n=0;SCHIFFE_L.forEach(({id})=>{if(state[id])['soft','wein'].forEach(typ=>{state[id][typ].forEach(r=>{if(r.bestellt)n++;});});});return n;}
-function totalAlarms(typ){let n=0;SCHIFFE_L.forEach(({id})=>{if(state[id])state[id][typ||'soft'].forEach((r,_)=>{const s=getStatus(r.bestand,r.soll);if(s!=='ok')n++;});});return n;}
+function statusCol(s){return s==='bad'?'var(--red)':s==='warn'?'var(--orange)':'var(--green)';}
+function schiffStatus(id){if(!state[id])return'ok';let w='ok';KATEGORIEN.forEach(k=>{state[id][k.id].forEach(r=>{const s=getStatus(r.bestand,r.soll);if(s==='bad')w='bad';else if(s==='warn'&&w!=='bad')w='warn';});});return w;}
+function totalPending(){let n=0;SCHIFFE_L.forEach(({id})=>{if(state[id])KATEGORIEN.forEach(k=>{state[id][k.id].forEach(r=>{if(r.bestellt)n++;});});});return n;}
 
-// ═══════════════════════════════════════
-// NAVIGATION
-// ═══════════════════════════════════════
-function setPage(page,btn){
-  currentPage=page;
-  document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  renderPage();
-}
+// NAV
+function setPage(p,btn){curPage=p;document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderPage();}
+function updateBadge(){const n=totalPending();const b=document.getElementById('bestell-badge');if(b){if(n>0){b.style.display='flex';b.textContent=n;}else b.style.display='none';}}
 function renderPage(){
-  const scroll=document.getElementById('main-scroll');
-  if(currentPage==='dashboard')scroll.innerHTML=renderDashboard();
-  else if(currentPage==='bestellungen')scroll.innerHTML=renderBestellungen();
-  else if(currentPage==='soll')scroll.innerHTML=renderSoll();
-  else if(currentPage==='statistik')scroll.innerHTML=renderStatistik();
-  else if(currentPage==='log')scroll.innerHTML=renderLog();
+  const s=document.getElementById('main-scroll');
+  if(curPage==='dashboard')s.innerHTML=renderDashboard();
+  else if(curPage==='bestell')s.innerHTML=renderBestell();
+  else if(curPage==='soll')s.innerHTML=renderSoll();
+  else if(curPage==='statistik')s.innerHTML=renderStatistik();
+  else s.innerHTML=renderLog();
   updateBadge();
 }
-function updateBadge(){
-  const n=totalPending();
-  const b=document.getElementById('bestell-badge');
-  if(n>0){b.style.display='flex';b.textContent=n;}else b.style.display='none';
-}
 
-// ═══════════════════════════════════════
 // DASHBOARD
-// ═══════════════════════════════════════
 function renderDashboard(){
-  let totalB=0,totalW=0,empty=0,low=0,pending=totalPending();
-  SCHIFFE_L.forEach(({id})=>{
-    if(!state[id])return;
-    state[id].soft.forEach((r,i)=>{totalB+=r.bestand*SOFT[i].chf;});
-    state[id].wein.forEach(r=>{totalW+=r.bestand;});
-    ['soft','wein'].forEach(typ=>{state[id][typ].forEach(r=>{const s=getStatus(r.bestand,r.soll);if(s==='bad')empty++;else if(s==='warn')low++;});});
-  });
-
-  // Warnungen kompakt
+  let pending=totalPending(),empty=0,low=0,totalChf=0;
   const warnings=[];
   SCHIFFE_L.forEach(({id,name,icon})=>{
     if(!state[id])return;
-    ['soft','wein'].forEach(typ=>{
-      state[id][typ].forEach((r,i)=>{
-        const s=getStatus(r.bestand,r.soll);
-        if(s!=='ok')warnings.push({schiff:name,icon,name:(typ==='soft'?SOFT[i].name:WEIN[i].name),typ,r,status:s});
+    KATEGORIEN.forEach(k=>{
+      state[id][k.id].forEach((r,i)=>{
+        if(k.id==='soft')totalChf+=r.bestand*(PRODUKTE.soft[i].chf||0);
+        const st=getStatus(r.bestand,r.soll);
+        if(st==='bad')empty++;
+        else if(st==='warn')low++;
+        if(st!=='ok')warnings.push({schiff:name,icon,artikel:PRODUKTE[k.id][i].name,kat:k.id,katLabel:k.label,r,st});
       });
     });
   });
 
   const warnHTML=warnings.length===0
-    ?`<div class="empty" style="padding:24px"><div class="empty-icon">✅</div><div class="empty-title">Alles OK!</div><div class="empty-sub">Keine Warnungen.</div></div>`
-    :warnings.map(w=>`<div class="alert-banner ${w.status==='bad'?'ab-red':'ab-orange'}">
-        <div class="ab-icon">${w.status==='bad'?'🔴':'🟠'}</div>
-        <div class="ab-info">
-          <div class="ab-title">${w.icon} ${w.schiff} · ${w.name}</div>
-          <div class="ab-sub">Ist: ${fmtH(w.r.bestand,w.typ)} · Soll: ${fmtH(w.r.soll,w.typ)}</div>
+    ?`<div class="empty" style="padding:20px"><div class="empty-icon">✅</div><div class="empty-title">Alles OK!</div></div>`
+    :warnings.slice(0,20).map(w=>`<div class="alert-row ${w.st==='bad'?'ar-red':'ar-orange'}">
+        <div class="ar-icon">${w.st==='bad'?'🔴':'🟠'}</div>
+        <div class="ar-info">
+          <div class="ar-title">${w.icon} ${w.schiff} · ${w.artikel}</div>
+          <div class="ar-sub">${w.katLabel} · Ist: ${fmtH(w.r.bestand,w.kat)} · Soll: ${fmtH(w.r.soll,w.kat)}</div>
         </div>
-        <span class="tag ${w.status==='bad'?'tag-bad':'tag-warn'}">${w.status==='bad'?'Leer':'Tief'}</span>
+        <span class="tag ${w.st==='bad'?'t-bad':'t-warn'}">${w.st==='bad'?'Leer':'Tief'}</span>
       </div>`).join('');
 
   return`
     <div class="stat-grid">
-      <div class="stat-card"><div class="stat-icon">📦</div><div class="stat-label">Offene Bestellungen</div><div class="stat-val" style="color:var(--blue)">${pending}</div></div>
-      <div class="stat-card"><div class="stat-icon">⚠️</div><div class="stat-label">Warnungen</div><div class="stat-val" style="color:${empty>0?'var(--red)':'var(--orange)'}">${empty+low}</div><div class="stat-sub">${empty} leer · ${low} tief</div></div>
-      <div class="stat-card"><div class="stat-icon">💰</div><div class="stat-label">Lager Soft (EK)</div><div class="stat-val" style="color:var(--purple);font-size:20px">CHF ${totalB.toFixed(0)}</div></div>
-      <div class="stat-card"><div class="stat-icon">🍷</div><div class="stat-label">Wein gesamt</div><div class="stat-val" style="color:var(--green)">${totalW} <span style="font-size:16px">Einh.</span></div></div>
+      <div class="stat"><div class="stat-icon">📦</div><div class="stat-label">Bestellungen</div><div class="stat-val" style="color:var(--blue)">${pending}</div></div>
+      <div class="stat"><div class="stat-icon">⚠️</div><div class="stat-label">Warnungen</div><div class="stat-val" style="color:${empty>0?'var(--red)':'var(--orange)'}">${empty+low}</div></div>
+      <div class="stat"><div class="stat-icon">💰</div><div class="stat-label">Soft-Lager (EK)</div><div class="stat-val" style="color:var(--purple);font-size:18px">CHF ${totalChf.toFixed(0)}</div></div>
+      <div class="stat"><div class="stat-icon">🍺</div><div class="stat-label">Kategorien</div><div class="stat-val" style="font-size:18px">4</div></div>
     </div>
-
-    <div class="sec-title">Schiffe im Überblick</div>
+    <div class="stitle">Schiffe im Überblick</div>
     <div class="card">${SCHIFFE_L.map(s=>{
       const st=schiffStatus(s.id);
-      const alarms=['soft','wein'].reduce((n,typ)=>{
-        if(!state[s.id])return n;
-        return n+state[s.id][typ].filter(r=>getStatus(r.bestand,r.soll)!=='ok').length;
-      },0);
-      const pending2=state[s.id]?['soft','wein'].reduce((n,typ)=>n+state[s.id][typ].filter(r=>r.bestellt).length,0):0;
+      const al=KATEGORIEN.reduce((n,k)=>n+(state[s.id]?state[s.id][k.id].filter(r=>getStatus(r.bestand,r.soll)!=='ok').length:0),0);
+      const pend=KATEGORIEN.reduce((n,k)=>n+(state[s.id]?state[s.id][k.id].filter(r=>r.bestellt).length:0),0);
       return`<div class="schiff-row" onclick="sollSchiff='${s.id}';setPage('soll',document.getElementById('nav-soll'))">
         <div class="sr-icon">${s.icon}</div>
         <div class="sr-info">
           <div class="sr-name">${s.name}</div>
-          <div class="sr-sub">${alarms>0?`${alarms} Alarm${alarms>1?'e':''}`:'Kein Alarm'} ${pending2>0?`· ${pending2} Bestellung${pending2>1?'en':''} offen`:''}</div>
+          <div class="sr-sub">${al>0?`${al} Alarm${al>1?'e':''}`:'Kein Alarm'}${pend>0?` · ${pend} Bestellung${pend>1?'en':''} offen`:''}</div>
         </div>
-        <div class="sr-right">
-          <div class="status-dot" style="background:${statusColor(st)}"></div>
-          <span class="tag ${st==='bad'?'tag-bad':st==='warn'?'tag-warn':'tag-ok'}">${st==='bad'?'Leer':st==='warn'?'Tief':'OK'}</span>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
+          <div class="status-dot" style="background:${statusCol(st)}"></div>
+          <span class="tag ${st==='bad'?'t-bad':st==='warn'?'t-warn':'t-ok'}">${st==='bad'?'Leer':st==='warn'?'Tief':'OK'}</span>
         </div>
       </div>`;
     }).join('')}</div>
-
-    <div class="sec-title">Warnungen (${warnings.length})</div>
+    <div class="stitle">Warnungen (${warnings.length})</div>
     ${warnHTML}`;
 }
 
-// ═══════════════════════════════════════
 // BESTELLUNGEN
-// ═══════════════════════════════════════
-function renderBestellungen(){
+function renderBestell(){
   const items=[];
   SCHIFFE_L.forEach(({id,name,icon})=>{
     if(!state[id])return;
-    ['soft','wein'].forEach(typ=>{
-      state[id][typ].forEach((r,i)=>{
-        if(r.bestellt)items.push({schiff:id,schiffName:name,icon,name:(typ==='soft'?SOFT[i].name:WEIN[i].name),geb:typ==='soft'?SOFT[i].geb:'6er-Einheit',typ,idx:i,r,status:getStatus(r.bestand,r.soll)});
+    KATEGORIEN.forEach(k=>{
+      state[id][k.id].forEach((r,i)=>{
+        if(r.bestellt)items.push({schiff:id,schiffName:name,icon,artikel:PRODUKTE[k.id][i].name,kat:k.id,katLabel:k.label,idx:i,r,st:getStatus(r.bestand,r.soll)});
       });
     });
   });
-
-  if(!items.length)return`<div class="empty"><div class="empty-icon">✅</div><div class="empty-title">Keine offenen Bestellungen</div><div class="empty-sub">Sobald ein Schiff etwas bestellt, erscheint es hier.</div></div>`;
-
-  // Gruppiert nach Schiff
+  if(!items.length)return`<div class="empty"><div class="empty-icon">✅</div><div class="empty-title">Keine Bestellungen</div><div class="empty-sub">Sobald ein Schiff bestellt, erscheint es hier.</div></div>`;
   const bySchiff={};
   items.forEach(it=>{if(!bySchiff[it.schiff])bySchiff[it.schiff]=[];bySchiff[it.schiff].push(it);});
-
   let html='';
   Object.entries(bySchiff).forEach(([id,rows])=>{
     const info=SCHIFFE_L.find(s=>s.id===id);
-    html+=`<div class="sec-title">${info.icon} ${info.name}</div>
-    <div class="card">${rows.map(it=>`
-      <div class="bestell-item">
-        <div class="bi-icon ${it.status==='bad'?'red':''}">${it.status==='bad'?'🔴':'🟠'}</div>
+    html+=`<div class="stitle">${info.icon} ${info.name}</div><div class="card">`;
+    rows.forEach(it=>{
+      html+=`<div class="bestell-item">
+        <div class="bi-icon" style="background:${it.st==='bad'?'var(--red-l)':'var(--orange-l)'}">${it.st==='bad'?'🔴':'🟠'}</div>
         <div class="bi-info">
-          <div class="bi-name">${it.name}</div>
-          <div class="bi-detail">${it.geb} · Ist: ${fmtH(it.r.bestand,it.typ)} · Soll: ${fmtH(it.r.soll,it.typ)}</div>
+          <div class="bi-name">${it.artikel}</div>
+          <div class="bi-detail">${it.katLabel} · Ist: ${fmtH(it.r.bestand,it.kat)} · Soll: ${fmtH(it.r.soll,it.kat)}</div>
           <div class="bi-schiff">${info.icon} ${info.name}</div>
         </div>
-        <button class="bi-btn" onclick="confirmOrder('${it.schiff}','${it.typ}',${it.idx})">Bestellt ✓</button>
-      </div>`).join('')}</div>`;
+        <button class="bi-btn" onclick="confirmOrder('${it.schiff}','${it.kat}',${it.idx})">Bestellt ✓</button>
+      </div>`;
+    });
+    html+='</div>';
   });
-
-  html+=`<button class="print-btn" onclick="printBestellliste()">🖨 Gesamte Bestellliste drucken</button>`;
+  html+=`<button class="print-btn" onclick="printBestell()">🖨 Bestellliste drucken</button>`;
   return html;
 }
 
-// ═══════════════════════════════════════
-// SOLL-BESTÄNDE
-// ═══════════════════════════════════════
+// SOLL
 function renderSoll(){
   const schiffOpts=SCHIFFE_L.map(s=>`<option value="${s.id}" ${sollSchiff===s.id?'selected':''}>${s.icon} ${s.name}</option>`).join('');
   const d=state[sollSchiff];
-  const items=sollTab==='soft'?SOFT:WEIN;
-
-  let rows='',lastKat='';
+  const items=PRODUKTE[sollKat];
+  let rows='',lastCat='';
   items.forEach((p,i)=>{
-    const r=d[sollTab][i];
+    const r=d[sollKat][i];
     const st=getStatus(r.bestand,r.soll);
-    if(sollTab==='wein'&&p.kat!==lastKat){
-      rows+=`<tr><td colspan="5" class="cat-cell">${p.kat}</td></tr>`;
-      lastKat=p.kat;
-    }
-    const diff=r.soll>0?r.bestand-r.soll:null;
+    const diff=r.soll>0?Math.round((r.bestand-r.soll)*2)/2:null;
+    if(p.kat&&p.kat!==lastCat){rows+=`<tr><td colspan="5" class="cat-cell">${p.kat}</td></tr>`;lastCat=p.kat;}
     rows+=`<tr>
-      <td><strong>${p.name}</strong><br><small style="color:var(--text3)">${sollTab==='soft'?p.geb:p.vol+' · 6er'}</small></td>
-      <td style="text-align:center;font-weight:700">${fmtH(r.bestand,sollTab)}</td>
-      <td style="text-align:center">
-        <input class="soll-input" type="number" min="0" step="0.5" value="${r.soll}" 
-          onchange="setSoll('${sollSchiff}','${sollTab}',${i},this.value)" />
-      </td>
+      <td><strong>${p.name}</strong>${p.nr?`<br><small style="color:var(--text3)">${p.nr}</small>`:''}</td>
+      <td style="text-align:center;font-weight:700">${fmtH(r.bestand,sollKat)}</td>
+      <td style="text-align:center"><input class="soll-inp" type="number" min="0" step="0.5" value="${r.soll}" onchange="setSoll('${sollSchiff}','${sollKat}',${i},this.value)"/></td>
       <td style="text-align:center">${diff!==null?`<span style="font-weight:700;color:${diff>=0?'var(--green)':'var(--red)'}">${diff>=0?'+':''}${diff}</span>`:'–'}</td>
-      <td style="text-align:center"><span class="tag ${st==='bad'?'tag-bad':st==='warn'?'tag-warn':'tag-ok'}">${st==='bad'?'Leer':st==='warn'?'Tief':'OK'}</span></td>
+      <td style="text-align:center"><span class="tag ${st==='bad'?'t-bad':st==='warn'?'t-warn':'t-ok'}">${st==='bad'?'Leer':st==='warn'?'Tief':'OK'}</span></td>
     </tr>`;
   });
-
   return`
-    <div class="card" style="margin-bottom:12px">
-      <div style="padding:14px 16px">
-        <div class="modal-label" style="margin-bottom:8px">Schiff wählen</div>
-        <select class="modal-select" style="background:var(--bg)" onchange="sollSchiff=this.value;renderPage()">${schiffOpts}</select>
-      </div>
-    </div>
-    <div class="segment">${['soft','wein'].map(t=>`<button class="seg-btn ${sollTab===t?'active':''}" onclick="sollTab='${t}';renderPage()">${t==='soft'?'Softgetränke':'Wein (6er-Einheiten)'}</button>`).join('')}</div>
+    <div style="margin-bottom:12px"><select class="sh-select" onchange="sollSchiff=this.value;renderPage()">${schiffOpts}</select></div>
+    <div class="seg">${KATEGORIEN.map(k=>`<button class="seg-btn ${sollKat===k.id?'active':''}" onclick="sollKat='${k.id}';renderPage()">${k.label}</button>`).join('')}</div>
     <div class="card"><div class="tbl-wrap"><table>
       <thead><tr><th>Artikel</th><th style="text-align:center">Ist</th><th style="text-align:center">Soll ✏️</th><th style="text-align:center">Diff</th><th style="text-align:center">Status</th></tr></thead>
       <tbody>${rows}</tbody>
     </table></div></div>
-    <div style="font-size:12px;color:var(--text3);text-align:center;margin-top:8px">Soll-Werte direkt in der Spalte "Soll" eingeben — Änderungen werden sofort gespeichert</div>`;
+    <div style="font-size:11px;color:var(--text3);text-align:center;margin-top:6px">Soll-Wert eingeben → wird sofort gespeichert</div>`;
 }
 
-// ═══════════════════════════════════════
 // STATISTIK
-// ═══════════════════════════════════════
 function renderStatistik(){
-  // Verbrauch aus Log
   const verbrauch={};
   SCHIFFE_L.forEach(({id})=>{verbrauch[id]=0;});
   log.filter(e=>e.typ==='Verbrauch').forEach(e=>{if(verbrauch[e.von]!==undefined)verbrauch[e.von]+=e.menge;});
-
   const maxV=Math.max(...Object.values(verbrauch),1);
-
-  // Kosten pro Schiff
   const kosten={};
-  SCHIFFE_L.forEach(({id})=>{
-    let k=0;
-    if(state[id])state[id].soft.forEach((r,i)=>{k+=r.bestand*SOFT[i].chf;});
-    kosten[id]=k;
-  });
+  SCHIFFE_L.forEach(({id})=>{let k=0;if(state[id])state[id].soft.forEach((r,i)=>{k+=r.bestand*(PRODUKTE.soft[i].chf||0);});kosten[id]=k;});
   const maxK=Math.max(...Object.values(kosten),1);
-
-  // Letzte 30 Tage Log stats
   const d30=new Date();d30.setDate(d30.getDate()-30);
   const recent=log.filter(e=>new Date(e.zeit)>=d30);
   const byTyp={Zubuchung:0,Verbrauch:0,Bezug:0};
   recent.forEach(e=>{if(byTyp[e.typ]!==undefined)byTyp[e.typ]++;});
+  // By category
+  const byKat={};
+  KATEGORIEN.forEach(k=>{byKat[k.id]=0;});
+  log.filter(e=>e.typ==='Verbrauch').forEach(e=>{if(e.kat&&byKat[e.kat]!==undefined)byKat[e.kat]+=e.menge;});
 
   return`
-    <div class="sec-title">Lagerbestand-Wert (Einkauf Soft)</div>
-    <div class="card" style="padding:16px">
-      ${SCHIFFE_L.map(s=>`
-        <div class="kosten-bar">
-          <div class="kb-label">${s.icon} ${s.name.replace('Bootshaus','BH')}</div>
-          <div class="kb-track"><div class="kb-fill" style="width:${Math.round(kosten[s.id]/maxK*100)}%"></div></div>
-          <div class="kb-val">CHF ${(kosten[s.id]||0).toFixed(0)}</div>
-        </div>`).join('')}
+    <div class="stitle">Lagerbestand-Wert Soft (EK)</div>
+    <div class="card" style="padding:14px">
+      ${SCHIFFE_L.map(s=>`<div class="kb-row">
+        <div class="kb-label">${s.icon} ${s.name.replace('Bootshaus','BH')}</div>
+        <div class="kb-track"><div class="kb-fill" style="width:${Math.round(kosten[s.id]/maxK*100)}%"></div></div>
+        <div class="kb-val">CHF ${(kosten[s.id]||0).toFixed(0)}</div>
+      </div>`).join('')}
     </div>
-
-    <div class="sec-title">Verbrauch gesamt (Harassen/Einheiten)</div>
-    <div class="card" style="padding:16px">
-      ${SCHIFFE_L.map(s=>`
-        <div class="kosten-bar">
-          <div class="kb-label">${s.icon} ${s.name.replace('Bootshaus','BH')}</div>
-          <div class="kb-track"><div class="kb-fill" style="width:${Math.round((verbrauch[s.id]||0)/maxV*100)}%;background:var(--orange)"></div></div>
-          <div class="kb-val">${(verbrauch[s.id]||0)} Hr./Einh.</div>
-        </div>`).join('')}
+    <div class="stitle">Verbrauch gesamt</div>
+    <div class="card" style="padding:14px">
+      ${SCHIFFE_L.map(s=>`<div class="kb-row">
+        <div class="kb-label">${s.icon} ${s.name.replace('Bootshaus','BH')}</div>
+        <div class="kb-track"><div class="kb-fill" style="width:${Math.round((verbrauch[s.id]||0)/maxV*100)}%;background:var(--orange)"></div></div>
+        <div class="kb-val">${(verbrauch[s.id]||0)} Einh.</div>
+      </div>`).join('')}
     </div>
-
-    <div class="sec-title">Aktivitäten letzte 30 Tage</div>
+    <div class="stitle">Verbrauch nach Kategorie</div>
+    <div class="card" style="padding:14px">
+      ${KATEGORIEN.map(k=>`<div class="kb-row">
+        <div class="kb-label">${k.label}</div>
+        <div class="kb-track"><div class="kb-fill" style="width:${Math.round((byKat[k.id]||0)/Math.max(...Object.values(byKat),1)*100)}%;background:${k.color}"></div></div>
+        <div class="kb-val">${(byKat[k.id]||0)} Einh.</div>
+      </div>`).join('')}
+    </div>
     <div class="stat-grid">
-      <div class="stat-card"><div class="stat-icon">↑</div><div class="stat-label">Zubuchungen</div><div class="stat-val" style="color:var(--blue)">${byTyp.Zubuchung}</div></div>
-      <div class="stat-card"><div class="stat-icon">↓</div><div class="stat-label">Verbrauch</div><div class="stat-val" style="color:var(--red)">${byTyp.Verbrauch}</div></div>
-      <div class="stat-card"><div class="stat-icon">⇄</div><div class="stat-label">Bezüge kl. Schiffe</div><div class="stat-val" style="color:var(--green)">${byTyp.Bezug}</div></div>
-      <div class="stat-card"><div class="stat-icon">📋</div><div class="stat-label">Total Aktionen</div><div class="stat-val">${recent.length}</div></div>
+      <div class="stat"><div class="stat-icon">↑</div><div class="stat-label">Zubuchungen</div><div class="stat-val" style="color:var(--blue)">${byTyp.Zubuchung}</div></div>
+      <div class="stat"><div class="stat-icon">↓</div><div class="stat-label">Verbrauch</div><div class="stat-val" style="color:var(--red)">${byTyp.Verbrauch}</div></div>
+      <div class="stat"><div class="stat-icon">⇄</div><div class="stat-label">Bezüge</div><div class="stat-val" style="color:var(--green)">${byTyp.Bezug}</div></div>
+      <div class="stat"><div class="stat-icon">📋</div><div class="stat-label">Total (30 Tage)</div><div class="stat-val">${recent.length}</div></div>
     </div>`;
 }
 
-// ═══════════════════════════════════════
-// AKTIVITÄTS-LOG
-// ═══════════════════════════════════════
+// LOG
 function renderLog(){
-  if(!log.length)return`<div class="empty"><div class="empty-icon">📋</div><div class="empty-title">Noch keine Aktivitäten</div><div class="empty-sub">Hier erscheinen alle Aktionen von allen Schiffen.</div></div>`;
-  return`<div class="card">${log.slice(0,80).map((e,i)=>{
+  if(!log.length)return`<div class="empty"><div class="empty-icon">📋</div><div class="empty-title">Noch keine Aktivitäten</div></div>`;
+  return`<div class="card">${log.slice(0,80).map(e=>{
     const col=e.typ==='Zubuchung'?'var(--blue)':e.typ==='Verbrauch'?'var(--red)':'var(--green)';
-    const icon=e.typ==='Zubuchung'?'↑':e.typ==='Verbrauch'?'↓':'⇄';
     return`<div class="log-item">
-      <div class="log-dot-col">
-        <div class="log-dot" style="background:${col}"></div>
-        ${i<Math.min(log.length,80)-1?'<div class="log-line"></div>':''}
-      </div>
+      <div class="log-dot" style="background:${col};margin-top:3px;flex-shrink:0"></div>
       <div class="log-body">
-        <div class="log-title">${icon} ${e.typ} · ${e.menge} ${e.einheit||''}</div>
-        <div class="log-sub">${e.artikel}</div>
+        <div class="log-title">${e.typ==='Zubuchung'?'↑':'↓'} ${e.typ} · ${e.menge} ${e.einheit||''}</div>
+        <div class="log-sub">${e.artikel}${e.kat?` · ${KATEGORIEN.find(k=>k.id===e.kat)?.label||e.kat}`:''}</div>
         <div class="log-sub">${e.von||'–'} → ${e.nach||'–'}</div>
         <div class="log-time">${fmtT(e.zeit)}</div>
       </div>
@@ -610,51 +476,48 @@ function renderLog(){
   }).join('')}</div>`;
 }
 
-// ═══════════════════════════════════════
 // ACTIONS
-// ═══════════════════════════════════════
-async function setSoll(schiff,typ,idx,val){
-  state[schiff][typ][idx].soll=parseFloat(val)||0;
-  state[schiff][typ][idx].updated=now();
-  markChanged(schiff,typ,idx);
+async function setSoll(schiff,kat,idx,val){
+  const soll=parseFloat(val)||0;
+  state[schiff][kat][idx].soll=soll;
   save();updateBadge();
-  await pushSoll(schiff,typ,idx);
+  // Fetch current bestand from DB first
+  const cur=await sbGet('lagerbestand2',`standort=eq.${encodeURIComponent(schiff)}&kat=eq.${kat}&artikel_index=eq.${idx}`);
+  let curBestand=state[schiff][kat][idx].bestand;
+  if(cur&&cur.length>0)curBestand=parseFloat(cur[0].bestand)||0;
+  await sbUpsert('lagerbestand2',{standort:schiff,kat,artikel_index:idx,bestand:curBestand,soll,bestellt:state[schiff][kat][idx].bestellt===1,updated_at:now()});
 }
-async function confirmOrder(schiff,typ,idx){
-  state[schiff][typ][idx].bestellt=0;
-  state[schiff][typ][idx].updated=now();
-  markChanged(schiff,typ,idx);
+
+async function confirmOrder(schiff,kat,idx){
+  state[schiff][kat][idx].bestellt=0;
   save();
-  await sbUpsert('lagerbestand',{standort:schiff,typ:typ,artikel_index:idx,bestand:state[schiff][typ][idx].bestand,soll:state[schiff][typ][idx].soll,bestellt:false,updated_at:now()});
+  const cur=await sbGet('lagerbestand2',`standort=eq.${encodeURIComponent(schiff)}&kat=eq.${kat}&artikel_index=eq.${idx}`);
+  let curBestand=state[schiff][kat][idx].bestand,curSoll=state[schiff][kat][idx].soll;
+  if(cur&&cur.length>0){curBestand=parseFloat(cur[0].bestand)||0;curSoll=parseFloat(cur[0].soll)||0;}
+  await sbUpsert('lagerbestand2',{standort:schiff,kat,artikel_index:idx,bestand:curBestand,soll:curSoll,bestellt:false,updated_at:now()});
   renderPage();
 }
 
-function printBestellliste(){
+function printBestell(){
   const items=[];
   SCHIFFE_L.forEach(({id,name})=>{
     if(!state[id])return;
-    ['soft','wein'].forEach(typ=>{
-      state[id][typ].forEach((r,i)=>{
-        if(r.bestellt)items.push({schiff:name,name:(typ==='soft'?SOFT[i].name:WEIN[i].name),geb:typ==='soft'?SOFT[i].geb:'6er-Einheit',typ,r});
-      });
-    });
+    KATEGORIEN.forEach(k=>{state[id][k.id].forEach((r,i)=>{if(r.bestellt)items.push({schiff:name,artikel:PRODUKTE[k.id][i].name,katLabel:k.label,kat:k.id,r});});});
   });
   const w=window.open('','_blank');
   w.document.write(`<html><head><title>SZR Bestellliste ${new Date().toLocaleDateString('de-CH')}</title>
-  <style>body{font-family:sans-serif;font-size:13px;padding:20px}h2{margin-bottom:4px}p{color:#666;margin-bottom:16px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #ddd;padding:8px 10px}th{background:#f5f5f5;font-weight:600}</style></head>
+  <style>body{font-family:sans-serif;font-size:13px;padding:20px}h2{margin-bottom:4px}p{color:#666;margin-bottom:16px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #ddd;padding:7px 10px}th{background:#f5f5f5;font-weight:600}</style></head>
   <body><h2>SZR Bestellliste</h2><p>${new Date().toLocaleDateString('de-CH',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}</p>
-  <table><thead><tr><th>Schiff</th><th>Artikel</th><th>Gebinde</th><th>Ist</th><th>Soll</th></tr></thead>
-  <tbody>${items.map(it=>`<tr><td>${it.schiff}</td><td>${it.name}</td><td>${it.geb}</td><td>${fmtH(it.r.bestand,it.typ)}</td><td>${fmtH(it.r.soll,it.typ)}</td></tr>`).join('')}</tbody>
+  <table><thead><tr><th>Schiff</th><th>Kategorie</th><th>Artikel</th><th>Ist</th><th>Soll</th></tr></thead>
+  <tbody>${items.map(it=>`<tr><td>${it.schiff}</td><td>${it.katLabel}</td><td>${it.artikel}</td><td>${fmtH(it.r.bestand,it.kat)}</td><td>${fmtH(it.r.soll,it.kat)}</td></tr>`).join('')}</tbody>
   </table></body></html>`);
   w.print();
 }
 
-// ═══════════════════════════════════════
 // INIT
-// ═══════════════════════════════════════
-document.getElementById('header-date').textContent=new Date().toLocaleDateString('de-CH',{weekday:'long',day:'numeric',month:'long'});
-syncAll();
-setInterval(syncAll,30000);
+document.getElementById('hdr-date').textContent=new Date().toLocaleDateString('de-CH',{weekday:'long',day:'numeric',month:'long'});
+doSync();
+setInterval(doSync,45000);
 renderPage();
 </script>
 </body>
