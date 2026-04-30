@@ -388,8 +388,11 @@ function now(){return new Date().toISOString();}
 function fmtH(v,kat){
   const u=KATEGORIEN.find(k=>k.id===kat)?.einheit||'';
   if(v===0)return'0 '+u;
-  if(v%1===0)return v+' '+u;
-  return'½ '+u;
+  const ganz=Math.floor(v);
+  const half=v%1!==0;
+  if(ganz===0)return'½ '+u;
+  if(!half)return ganz+' '+u;
+  return ganz+'½ '+u;
 }
 function fmtT(iso){
   if(!iso)return'–';
@@ -598,11 +601,20 @@ function katOpts(form){
 function mpHTML(val,fvar){
   const kat=KATEGORIEN.find(k=>k.id==(fvar==='zF'?zF.kat:fvar==='aF'?aF.kat:fvar==='bF'?bF.kat:bestellF.kat));
   const u=kat?.einheit||'';
-  const lbl=val%1!==0?`½ ${u}`:val===1?`1 ${u}`:`${val} ${u}`;
   return`<div class="mp">
     <button class="mp-btn mp-m" onclick="${fvar}.menge=Math.max(0.5,Math.round((${fvar}.menge-0.5)*2)/2);renderModal()">−</button>
-    <div class="mp-val"><div class="mp-num">${val}</div><div class="mp-unit">${lbl}</div></div>
+    <div class="mp-val"><div class="mp-num">${fmtH(val,kat?.id||'soft')}</div></div>
     <button class="mp-btn mp-p" onclick="${fvar}.menge=Math.round((${fvar}.menge+0.5)*2)/2;renderModal()">+</button>
+  </div>`;
+}
+// Nur ganze Harassen — für Bestellungen
+function mpHTMLGanz(val,fvar){
+  const kat=KATEGORIEN.find(k=>k.id==bestellF.kat);
+  const u=kat?.einheit||'';
+  return`<div class="mp">
+    <button class="mp-btn mp-m" onclick="${fvar}.menge=Math.max(1,${fvar}.menge-1);renderModal()">−</button>
+    <div class="mp-val"><div class="mp-num">${Math.round(val)} ${u}</div></div>
+    <button class="mp-btn mp-p" onclick="${fvar}.menge=${fvar}.menge+1;renderModal()">+</button>
   </div>`;
 }
 
@@ -662,21 +674,23 @@ function renderModal(){
   }
   else if(modal==='bestellen'){
     const prod=PRODUKTE[bestellF.kat][bestellF.art];
+    bestellF.menge=Math.max(1,Math.round(bestellF.menge)); // Ensure whole number
     root.innerHTML=`<div class="overlay" onclick="closeModal()"><div class="sheet" onclick="event.stopPropagation()">
       <div class="handle"></div>
       <div class="sh-title">Bestellen</div>
       <div class="sh-sub">${prod?.name||''}</div>
-      <div class="sh-sec"><div class="sh-label">Wieviel bestellen?</div>${mpHTML(bestellF.menge,'bestellF')}</div>
+      <div class="sh-sec"><div class="sh-label">Wieviel bestellen? (nur ganze Harassen/Einheiten)</div>${mpHTMLGanz(bestellF.menge,'bestellF')}</div>
       <button class="act-btn ab-blue" onclick="commitBestellen()">Bestellung melden ✓</button>
     </div></div>`;
   }
   else if(modal==='editMenge'){
     const prod=PRODUKTE[bestellF.kat][bestellF.art];
+    bestellF.menge=Math.max(1,Math.round(bestellF.menge));
     root.innerHTML=`<div class="overlay" onclick="closeModal()"><div class="sheet" onclick="event.stopPropagation()">
       <div class="handle"></div>
       <div class="sh-title">Menge anpassen</div>
       <div class="sh-sub">${prod?.name||''} — Bestellung bereits gemeldet</div>
-      <div class="sh-sec"><div class="sh-label">Neue Menge</div>${mpHTML(bestellF.menge,'bestellF')}</div>
+      <div class="sh-sec"><div class="sh-label">Neue Menge (nur ganze Harassen/Einheiten)</div>${mpHTMLGanz(bestellF.menge,'bestellF')}</div>
       <button class="act-btn ab-blue" onclick="commitEditMenge()">Menge aktualisieren</button>
       <button class="act-btn" style="background:var(--red-l);color:var(--red);margin-top:8px" onclick="commitZurückziehen()">Bestellung zurückziehen</button>
     </div></div>`;
@@ -786,12 +800,13 @@ function quickA(kat,idx){aF.kat=kat;aF.art=idx;openAbgang();}
 function openBestellen(kat,idx){
   bestellF.kat=kat;bestellF.art=idx;
   const r=state[curSchiff][kat][idx];
-  bestellF.menge=r.soll>r.bestand?Math.round((r.soll-r.bestand)*2)/2:1;
+  const diff=r.soll-r.bestand;
+  bestellF.menge=Math.max(1,Math.ceil(diff>0?diff:1)); // Always whole number
   modal='bestellen';renderModal();
 }
 function editBestellMenge(kat,idx){
   bestellF.kat=kat;bestellF.art=idx;
-  bestellF.menge=state[curSchiff][kat][idx].bestellMenge||1;
+  bestellF.menge=Math.max(1,Math.round(state[curSchiff][kat][idx].bestellMenge||1));
   modal='editMenge';renderModal();
 }
 
