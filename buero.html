@@ -464,8 +464,9 @@ function renderBestell(){
   } else {
     html+=`<div class="card">`;
     bestellt.forEach(b=>{
-      // Split-Anzeige
-      const splits=b.splits||[{schiff:b.zielSchiff||b.schiff,menge:b.menge}];
+      // Sicherstellen dass splits immer auf b gespeichert ist
+      if(!b.splits||b.splits.length===0)b.splits=[{schiff:b.zielSchiff||b.schiff,menge:b.menge}];
+      const splits=b.splits;
       const splitHtml=splits.map((sp,si)=>`
         <div style="display:flex;align-items:center;gap:6px;margin-top:5px;flex-wrap:wrap">
           <select style="font-size:12px;padding:2px 6px;border:1px solid var(--border);border-radius:6px" onchange="changeSplitSchiff('${b.id}',${si},this.value)">
